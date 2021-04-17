@@ -1,5 +1,5 @@
 from unittest.mock import patch
-from simple_mockforce.salesforce import MockSalesforce
+from simple_mockforce.mock import MockSalesforce
 
 
 def mock_salesforce(func):
