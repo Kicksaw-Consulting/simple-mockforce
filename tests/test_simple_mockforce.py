@@ -1,5 +1,9 @@
-from simple_mockforce import __version__
+from simple_mockforce import mock_salesforce
+from simple_salesforce import Salesforce
 
 
-def test_version():
-    assert __version__ == '0.1.0'
+@mock_salesforce
+def test_sf_mock():
+    salesforce = Salesforce(
+        username="hi", password="hello", security_token="123", domain="mock"
+    )

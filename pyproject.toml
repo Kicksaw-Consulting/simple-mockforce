@@ -6,7 +6,6 @@ authors = ["Alex Drozd <drozdster@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-httpretty = "^1.0.5"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
