@@ -35,8 +35,7 @@ class MockSalesforce(Salesforce):
 
     def query_all(self, query, include_deleted, **kwargs):
         """
-        This isn't intended for high-volume testing. Unit tests should use a low
-        volume of data. Simply calling query instead will suffice
+        Unit tests should use a low volume of data. Simply calling query instead will suffice
         """
         return self.query(query, include_deleted=include_deleted, **kwargs)
 
@@ -44,6 +43,7 @@ class MockSalesforce(Salesforce):
         parse_results = parse(query)
         sobject = parse_results["sobject"]
         fields = parse_results["fields"].asList()
+        limit = parse_results["limit"]
 
         objects = self.instance_mock_data[sobject]
 
@@ -51,6 +51,9 @@ class MockSalesforce(Salesforce):
         records = [
             *map(lambda record: {field: record[field] for field in fields}, objects)
         ]
+
+        if limit:
+            records[: limit[0][1]]
 
         body = {
             "totalSize": len(records),

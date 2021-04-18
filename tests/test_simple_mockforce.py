@@ -9,6 +9,6 @@ def test_sf_mock():
         username="hi", password="hello", security_token="123", domain="mock"
     )
 
-    results = salesforce.query("SELECT Id, Name FROM Contact")
+    results = salesforce.query("SELECT Id, Name FROM Contact LIMIT 1")
     records = results["records"]
-    assert records
+    assert len(records)
