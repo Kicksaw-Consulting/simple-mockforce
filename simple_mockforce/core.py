@@ -1,10 +1,9 @@
-from unittest.mock import patch
-from simple_mockforce.mock import MockSalesforce
-
-
 def mock_salesforce(func):
-    @patch("simple_salesforce.Salesforce", MockSalesforce)
     def wrapper(*args, **kwargs):
+        import sys
+
+        sys.modules["simple_salesforce"] = __import__("simple_mockforce")
         func(*args, **kwargs)
+        del sys.modules["simple_salesforce"]
 
     return wrapper

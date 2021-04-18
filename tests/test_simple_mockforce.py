@@ -1,10 +1,9 @@
-from simple_mockforce.mock import MockSalesforce
+from simple_mockforce import mock_salesforce
+from simple_salesforce import Salesforce
 
 
-def test_sf_mock(monkeypatch):
-    salesforce = MockSalesforce(
+@mock_salesforce
+def test_sf_mock():
+    salesforce = Salesforce(
         username="hi", password="hello", security_token="123", domain="mock"
     )
-
-    result = salesforce.query("SELECT Id FROM Contact")
-    assert result == None
