@@ -12,6 +12,8 @@ def MockSalesforceLogin(*args, **kwagrs):
 
 
 class MockSalesforce(Salesforce):
+    raise NotImplementedError
+
     @patch("simple_salesforce.api.SalesforceLogin", MockSalesforceLogin)
     def __init__(
         self,
