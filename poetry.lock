@@ -146,7 +146,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 name = "pyparsing"
 version = "2.4.7"
 description = "Python parsing module"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 
@@ -171,6 +171,17 @@ wcwidth = "*"
 [package.extras]
 checkqa-mypy = ["mypy (==v0.761)"]
 testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "requests", "xmlschema"]
+
+[[package]]
+name = "python-soql-parser"
+version = "0.1.0"
+description = "A pyparsing-based library for parsing SOQL statements"
+category = "main"
+optional = false
+python-versions = ">=3.8,<4.0"
+
+[package.dependencies]
+pyparsing = ">=2.4.7,<3.0.0"
 
 [[package]]
 name = "requests"
@@ -226,7 +237,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "cc3a003cc77a27e6bdc08fc850608255482a752dedd73c43bbd35342bc9b07a7"
+content-hash = "007ed6b31c9d7a42f8889f9c155eda07ff0db3c1876bfa2336302a81674b59df"
 
 [metadata.files]
 atomicwrites = [
@@ -337,6 +348,10 @@ pyparsing = [
 pytest = [
     {file = "pytest-5.4.3-py3-none-any.whl", hash = "sha256:5c0db86b698e8f170ba4582a492248919255fcd4c79b1ee64ace34301fb589a1"},
     {file = "pytest-5.4.3.tar.gz", hash = "sha256:7979331bfcba207414f5e1263b5a0f8f521d0f457318836a7355531ed1a4c7d8"},
+]
+python-soql-parser = [
+    {file = "python-soql-parser-0.1.0.tar.gz", hash = "sha256:671cb4d29a798558ec9afac27e92300625db2d8e1aabbde2a67f6ce803652c96"},
+    {file = "python_soql_parser-0.1.0-py3-none-any.whl", hash = "sha256:a95260d07fc794b2747f5036d93eb946f3e4c0c942406bb7570b142783724f76"},
 ]
 requests = [
     {file = "requests-2.25.1-py2.py3-none-any.whl", hash = "sha256:c210084e36a42ae6b9219e00e48287def368a26d03a048ddad7bfee44f75871e"},
