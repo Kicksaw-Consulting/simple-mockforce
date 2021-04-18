@@ -1,19 +1,13 @@
+import json
 import re
-
 import httpretty
 
-from functools import reduce, partial
 
-from simple_salesforce import Salesforce, SalesforceMalformedRequest
+from python_soql_parser import parse
 
+from simple_salesforce import Salesforce
 
-SF_VERSION = "[0-9]*[.]0"
-BASE_URL = "https?://([a-z0-9]+[.])*salesforce[.]com"
-DESCRIBE_URL = f"{BASE_URL}/services/data/v{SF_VERSION}/sobjects/Contact/describe"
-# example of query string if we decide to use q=Select+FirstName+from+Contact+
-QUERY_URL = f"{BASE_URL}/services/data/v{SF_VERSION}/query/"
-LOGIN_URL = f"{BASE_URL}/services/Soap/u/{SF_VERSION}"
-SOAP_API_LOGIN_RESPONSE = f'<?xml version="1.0"?><soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"><soapenv:Body><loginResponse><result><serverUrl>{BASE_URL}</serverUrl><sessionId></sessionId></result></loginResponse></soapenv:Body></soapenv:Envelope>'
+from simple_mockforce.patch_constants import LOGIN_URL, SOAP_API_LOGIN_RESPONSE
 
 
 class MockSalesforce(Salesforce):
@@ -36,18 +30,40 @@ class MockSalesforce(Salesforce):
         # will store {'Contact': [{"Id": "123456789123456789", # ... }], # ... }
         # self.instance_mock_data = dict()
         self.instance_mock_data = {
-            "Contact": [{"Id": "123", "Name": "Bob"}, {"Id": "124", "Name": "John"}]
+            "contact": [{"id": "123", "name": "Bob"}, {"id": "124", "name": "John"}]
         }
 
+    def query_all(self, query, include_deleted, **kwargs):
+        """
+        This isn't intended for high-volume testing. Unit tests should use a low
+        volume of data. Simply calling query instead will suffice
+        """
+        return self.query(query, include_deleted=include_deleted, **kwargs)
+
     def query(self, query, include_deleted=False, **kwargs):
-        try:
-            components = re.split("SELECT | FROM |,", query)
-            components.pop(0)  # remove empty string element at beginning
-            object_name = components.pop(-1)
-            fields = [*map(lambda component: component.strip(), components)]
-            objects = self.instance_mock_data[object_name]
-            return [
-                *map(lambda record: {field: record[field] for field in fields}, objects)
-            ]
-        except:
-            raise SalesforceMalformedRequest
+        parse_results = parse(query)
+        sobject = parse_results["sobject"]
+        fields = parse_results["fields"].asList()
+
+        objects = self.instance_mock_data[sobject]
+
+        # TODO: construct attributes
+        records = [
+            *map(lambda record: {field: record[field] for field in fields}, objects)
+        ]
+
+        body = {
+            "totalSize": len(records),
+            "done": True,
+            "records": records,
+        }
+        url = self.base_url + ("queryAll/" if include_deleted else "query/")
+
+        httpretty.register_uri(
+            httpretty.GET,
+            uri=url,
+            body=json.dumps(body),
+            content_type="content/json",
+        )
+
+        return super().query(query, include_deleted=include_deleted, **kwargs)
