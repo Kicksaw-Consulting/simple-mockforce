@@ -1,28 +1,37 @@
 import re
 
-from functools import reduce, partial
+import httpretty
 
-from unittest.mock import patch
+from functools import reduce, partial
 
 from simple_salesforce import Salesforce, SalesforceMalformedRequest
 
 
-def MockSalesforceLogin(*args, **kwagrs):
-    return "mock_session_id", "mock_sf_instance"
+SF_VERSION = "[0-9]*[.]0"
+BASE_URL = "https?://([a-z0-9]+[.])*salesforce[.]com"
+DESCRIBE_URL = f"{BASE_URL}/services/data/v{SF_VERSION}/sobjects/Contact/describe"
+# example of query string if we decide to use q=Select+FirstName+from+Contact+
+QUERY_URL = f"{BASE_URL}/services/data/v{SF_VERSION}/query/"
+LOGIN_URL = f"{BASE_URL}/services/Soap/u/{SF_VERSION}"
+SOAP_API_LOGIN_RESPONSE = f'<?xml version="1.0"?><soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"><soapenv:Body><loginResponse><result><serverUrl>{BASE_URL}</serverUrl><sessionId></sessionId></result></loginResponse></soapenv:Body></soapenv:Envelope>'
 
 
 class MockSalesforce(Salesforce):
-    raise NotImplementedError
-
-    @patch("simple_salesforce.api.SalesforceLogin", MockSalesforceLogin)
     def __init__(
         self,
         *args,
-        **kwagrs,
+        **kwargs,
     ):
+        httpretty.enable(allow_net_connect=False)
+        httpretty.register_uri(
+            httpretty.POST,
+            uri=re.compile(LOGIN_URL),
+            body=SOAP_API_LOGIN_RESPONSE,
+            content_type="text/xml",
+        )
         super().__init__(
             *args,
-            **kwagrs,
+            **kwargs,
         )
         # will store {'Contact': [{"Id": "123456789123456789", # ... }], # ... }
         # self.instance_mock_data = dict()
