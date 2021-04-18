@@ -1,4 +1,4 @@
-from simple_mockforce.core import mock_salesforce
+from simple_mockforce import mock_salesforce
 
 
 @mock_salesforce
