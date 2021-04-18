@@ -1,2 +1,2 @@
-class Salesforce:
-    pass
+class MockSalesforce:
+    raise NotImplementedError

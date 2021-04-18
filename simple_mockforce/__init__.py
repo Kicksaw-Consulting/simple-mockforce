@@ -1,1 +1,1 @@
-from simple_mockforce.core import mock_salesforce
+from simple_mockforce.salesforce import MockSalesforce as Salesforce
