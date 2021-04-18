@@ -1,0 +1,2 @@
+class Salesforce:
+    pass
