@@ -1,6 +1,5 @@
-import json
 import re
-import httpretty
+import responses
 
 
 from python_soql_parser import parse
@@ -11,15 +10,15 @@ from simple_mockforce.patch_constants import LOGIN_URL, SOAP_API_LOGIN_RESPONSE
 
 
 class MockSalesforce(Salesforce):
+    @responses.activate
     def __init__(
         self,
         *args,
         **kwargs,
     ):
-        httpretty.enable(allow_net_connect=False)
-        httpretty.register_uri(
-            httpretty.POST,
-            uri=re.compile(LOGIN_URL),
+        responses.add(
+            responses.POST,
+            re.compile(LOGIN_URL),
             body=SOAP_API_LOGIN_RESPONSE,
             content_type="text/xml",
         )
@@ -39,6 +38,7 @@ class MockSalesforce(Salesforce):
         """
         return self.query(query, include_deleted=include_deleted, **kwargs)
 
+    @responses.activate
     def query(self, query, include_deleted=False, **kwargs):
         parse_results = parse(query)
         sobject = parse_results["sobject"]
@@ -62,10 +62,10 @@ class MockSalesforce(Salesforce):
         }
         url = self.base_url + ("queryAll/" if include_deleted else "query/")
 
-        httpretty.register_uri(
-            httpretty.GET,
-            uri=url,
-            body=json.dumps(body),
+        responses.add(
+            responses.GET,
+            url,
+            json=body,
             content_type="content/json",
         )
 
