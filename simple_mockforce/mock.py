@@ -43,7 +43,7 @@ class MockSalesforce(Salesforce):
         parse_results = parse(query)
         sobject = parse_results["sobject"]
         fields = parse_results["fields"].asList()
-        limit = parse_results["limit"]
+        limit = parse_results["limit"].asList()
 
         objects = self.instance_mock_data[sobject]
 
@@ -53,7 +53,7 @@ class MockSalesforce(Salesforce):
         ]
 
         if limit:
-            records[: limit[0][1]]
+            records = records[: limit[0]]
 
         body = {
             "totalSize": len(records),

@@ -11,4 +11,4 @@ def test_sf_mock():
 
     results = salesforce.query("SELECT Id, Name FROM Contact LIMIT 1")
     records = results["records"]
-    assert len(records)
+    assert len(records) == 1
