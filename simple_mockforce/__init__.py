@@ -1,12 +1,12 @@
 import re
-from simple_mockforce.callbacks import query_callback
+from simple_mockforce.callbacks import get_callback, query_callback
 
 import responses
 
-from simple_mockforce.patch_constants import (
+from simple_mockforce.constants import (
     LOGIN_URL,
     SOAP_API_LOGIN_RESPONSE,
-    BASE_URL,
+    GET_URL,
     QUERY_URL,
 )
 
@@ -20,11 +20,22 @@ def mock_salesforce(func):
             body=SOAP_API_LOGIN_RESPONSE,
             content_type="text/xml",
         )
-
         responses.add_callback(
             responses.GET,
             re.compile(QUERY_URL),
             callback=query_callback,
+            content_type="content/json",
+        )
+        responses.add_callback(
+            responses.GET,
+            re.compile(QUERY_URL),
+            callback=query_callback,
+            content_type="content/json",
+        )
+        responses.add_callback(
+            responses.GET,
+            re.compile(GET_URL),
+            callback=get_callback,
             content_type="content/json",
         )
         func(*args, **kwargs)
