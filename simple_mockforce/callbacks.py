@@ -44,3 +44,27 @@ def get_callback(request):
         {},
         json.dumps({"attributes": {"type": sobject, "url": path}, **narrowed}),
     )
+
+
+def create_callback(request):
+    url = request.url
+    path = urlparse(url).path
+    body = json.loads(request.body)
+
+    split_up = url.split("/")
+    # TODO: use pyparsing
+    sobject = split_up[-2]
+
+    normalized = {key.lower(): value for key, value in body.items()}
+
+    normalized_object_name = sobject.lower()
+    if sobject.lower() in virtual_salesforce.data:
+        virtual_salesforce.data[normalized_object_name].append(normalized)
+    else:
+        virtual_salesforce.data[normalized_object_name] = [normalized]
+
+    return (
+        200,
+        {},
+        json.dumps({"attributes": {"type": sobject, "url": path}, **body}),
+    )

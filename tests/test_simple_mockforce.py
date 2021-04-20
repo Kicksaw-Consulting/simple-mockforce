@@ -33,3 +33,24 @@ def test_get_object_mock():
             "url": "/services/data/v42.0/sobjects/Contact/123",
         },
     }
+
+
+@mock_salesforce
+def test_create_object_mock():
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    result = salesforce.Contact.create(
+        {"Id": "12345", "FirstName": "John", "LastName": "Doe"}
+    )
+
+    return
+
+    assert dict(result) == {
+        "id": "12345",
+        "firstname": "John",
+        "lastname": "Doe",
+        "attributes": {
+            "type": "Contact",
+            "url": "/services/data/v42.0/sobjects/Contact/12345",
+        },
+    }
