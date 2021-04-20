@@ -1,12 +1,13 @@
 import json
 
+from urllib.parse import urlparse
+
 from python_soql_parser import parse
 
-from simple_mockforce.state import virtual_salesforce
+from simple_mockforce.virtual import virtual_salesforce
 
 
 def query_callback(request):
-    headers = {}
     parse_results = parse(request.params["q"])
     sobject = parse_results["sobject"]
     fields = parse_results["fields"].asList()
@@ -15,11 +16,31 @@ def query_callback(request):
     # TODO: construct attributes
     records = [*map(lambda record: {field: record[field] for field in fields}, objects)]
     if limit:
-        records = records[: limit[0]]
+        limit: int = limit[0]
+        records = records[:limit]
 
     body = {
         "totalSize": len(records),
         "done": True,
         "records": records,
     }
-    return (200, headers, json.dumps(body))
+    return (200, {}, json.dumps(body))
+
+
+def get_callback(request):
+    url = request.url
+    path = urlparse(url).path
+    split_up = url.split("/")
+    # TODO: use pyparsing
+    sobject = split_up[-2]
+    record_id = split_up[-1]
+
+    objects = virtual_salesforce.data[sobject.lower()]
+
+    narrowed = [*filter(lambda object_: object_["id"] == record_id, objects)][0]
+
+    return (
+        200,
+        {},
+        json.dumps({"attributes": {"type": sobject, "url": path}, **narrowed}),
+    )
