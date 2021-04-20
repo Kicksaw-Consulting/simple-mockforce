@@ -1,9 +1,8 @@
-import json
 import re
+from simple_mockforce.callbacks import query_callback
 
 import responses
 
-from simple_mockforce.mock import MockSalesforce as Salesforce
 from simple_mockforce.patch_constants import (
     LOGIN_URL,
     SOAP_API_LOGIN_RESPONSE,
@@ -22,15 +21,10 @@ def mock_salesforce(func):
             content_type="text/xml",
         )
 
-        def request_callback(request):
-            resp_body = {}
-            headers = {}
-            return (200, headers, json.dumps(resp_body))
-
         responses.add_callback(
             responses.GET,
             re.compile(QUERY_URL),
-            callback=request_callback,
+            callback=query_callback,
             content_type="content/json",
         )
         func(*args, **kwargs)
