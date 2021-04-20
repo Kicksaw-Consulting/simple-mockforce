@@ -10,18 +10,11 @@ from simple_mockforce.patch_constants import LOGIN_URL, SOAP_API_LOGIN_RESPONSE
 
 
 class MockSalesforce(Salesforce):
-    @responses.activate
     def __init__(
         self,
         *args,
         **kwargs,
     ):
-        responses.add(
-            responses.POST,
-            re.compile(LOGIN_URL),
-            body=SOAP_API_LOGIN_RESPONSE,
-            content_type="text/xml",
-        )
         super().__init__(
             *args,
             **kwargs,
