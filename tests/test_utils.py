@@ -1,5 +1,3 @@
-import json
-
 from simple_mockforce.utils import (
     parse_detail_url,
     parse_create_url,

@@ -109,3 +109,27 @@ def update_callback(request):
         {},
         json.dumps({}),
     )
+
+
+def delete_callback(request):
+    url = request.url
+    path = urlparse(url).path
+
+    sobject, _, record_id = parse_detail_url(path)
+
+    normalized_object_name = sobject.lower()
+
+    objects = virtual_salesforce.data[normalized_object_name]
+
+    index = None
+    for idx, object_ in enumerate(objects):
+        if object_["id"] == record_id:
+            index = idx
+
+    objects.pop(index)
+
+    return (
+        204,
+        {},
+        json.dumps({}),
+    )

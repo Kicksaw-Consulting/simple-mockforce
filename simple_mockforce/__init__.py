@@ -4,6 +4,7 @@ import responses
 
 from simple_mockforce.callbacks import (
     create_callback,
+    delete_callback,
     get_callback,
     query_callback,
     update_callback,
@@ -48,6 +49,12 @@ def mock_salesforce(func):
             responses.PATCH,
             re.compile(DETAIL_URL),
             callback=update_callback,
+            content_type="content/json",
+        )
+        responses.add_callback(
+            responses.DELETE,
+            re.compile(DETAIL_URL),
+            callback=delete_callback,
             content_type="content/json",
         )
         func(*args, **kwargs)
