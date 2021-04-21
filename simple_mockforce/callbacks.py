@@ -91,11 +91,15 @@ def update_callback(request):
     normalized_object_name = sobject.lower()
 
     objects = virtual_salesforce.data[normalized_object_name]
-    narrowed = [*filter(lambda object_: object_["id"] == record_id, objects)][0]
 
-    narrowed = {**narrowed, **normalized}
+    index = None
+    original = None
+    for idx, object_ in enumerate(objects):
+        if object_["id"] == record_id:
+            index = idx
+            original = object_
 
-    print(virtual_salesforce.data[normalized_object_name])
+    virtual_salesforce.data[normalized_object_name][index] = {**original, **normalized}
 
     return (
         204,

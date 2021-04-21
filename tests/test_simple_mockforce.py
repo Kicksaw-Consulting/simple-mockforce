@@ -55,10 +55,10 @@ def test_create_object_mock():
     assert result["errors"] == []
 
 
-# @mock_salesforce
-# def test_update_object_mock():
-#     salesforce = Salesforce(**MOCK_CREDS)
+@mock_salesforce
+def test_update_object_mock():
+    salesforce = Salesforce(**MOCK_CREDS)
 
-#     result = salesforce.Contact.update("12345", {"LastName": "Smith"})
+    result = salesforce.Contact.update("123", {"LastName": "Smith"})
 
-#     assert result == 204
+    assert result == 204
