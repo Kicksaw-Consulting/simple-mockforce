@@ -18,7 +18,7 @@ def query_callback(request):
     sobject = parse_results["sobject"]
     fields = parse_results["fields"].asList()
     limit = parse_results["limit"].asList()
-    objects = virtual_salesforce.data[sobject]
+    objects = virtual_salesforce.get_sobjects(sobject)
     # TODO: construct attributes
     records = [*map(lambda record: {field: record[field] for field in fields}, objects)]
     if limit:
@@ -38,7 +38,7 @@ def get_callback(request):
     path = urlparse(url).path
     sobject, _, record_id = parse_detail_url(path)
 
-    objects = virtual_salesforce.data[sobject.lower()]
+    objects = virtual_salesforce.get_sobjects(sobject)
 
     narrowed = [*filter(lambda object_: object_["id"] == record_id, objects)][0]
 
@@ -62,11 +62,7 @@ def create_callback(request):
 
     normalized["id"] = id_
 
-    normalized_object_name = sobject.lower()
-    if sobject.lower() in virtual_salesforce.data:
-        virtual_salesforce.data[normalized_object_name].append(normalized)
-    else:
-        virtual_salesforce.data[normalized_object_name] = [normalized]
+    virtual_salesforce.create(sobject, normalized)
 
     return (
         200,
@@ -87,7 +83,7 @@ def update_callback(request):
 
     normalized_object_name = sobject.lower()
 
-    objects = virtual_salesforce.data[normalized_object_name]
+    objects = virtual_salesforce.get_sobjects(sobject)
 
     try:
         original, index = find_object_and_index(
@@ -117,9 +113,7 @@ def delete_callback(request):
 
     sobject, _, record_id = parse_detail_url(path)
 
-    normalized_object_name = sobject.lower()
-
-    objects = virtual_salesforce.data[normalized_object_name]
+    objects = virtual_salesforce.get_sobjects(sobject)
 
     index = None
     for idx, object_ in enumerate(objects):
