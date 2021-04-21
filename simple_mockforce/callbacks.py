@@ -14,16 +14,7 @@ from simple_mockforce.virtual import virtual_salesforce
 
 
 def query_callback(request):
-    parse_results = parse(request.params["q"])
-    sobject = parse_results["sobject"]
-    fields = parse_results["fields"].asList()
-    limit = parse_results["limit"].asList()
-    objects = virtual_salesforce.get_sobjects(sobject)
-    # TODO: construct attributes
-    records = [*map(lambda record: {field: record[field] for field in fields}, objects)]
-    if limit:
-        limit: int = limit[0]
-        records = records[:limit]
+    records = virtual_salesforce.query(request.params["q"])
 
     body = {
         "totalSize": len(records),

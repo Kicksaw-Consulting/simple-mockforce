@@ -1,5 +1,7 @@
 # TODO: determine if provisioning should be implicit like it is now, or if it should be explicitly done
 import uuid
+
+from python_soql_parser import parse
 from simple_mockforce.utils import (
     find_object_and_index,
 )
@@ -21,27 +23,21 @@ class VirtualSalesforceInstance:
             "contact": [{"id": "123", "name": "Bob"}, {"id": "124", "name": "John"}]
         }
 
-    def get_sobjects(self, sobject_name: str):
-        """
-        Returns the objects currently loaded into the virtual instance
-        """
-        sobject_name = sobject_name.lower()
-        self._provision_sobject(sobject_name)
-        return self.data[sobject_name]
+    def query(self, soql: str):
+        parse_results = parse(soql)
+        sobject = parse_results["sobject"]
+        fields = parse_results["fields"].asList()
+        limit = parse_results["limit"].asList()
+        objects = self.get_sobjects(sobject)
+        # TODO: construct attributes
+        records = [
+            *map(lambda record: {field: record[field] for field in fields}, objects)
+        ]
+        if limit:
+            limit: int = limit[0]
+            records = records[:limit]
 
-    def _provision_sobject(self, sobject_name: str):
-        """
-        Provisions a virtual Salesfoce object
-
-        Use the word "provision" instead of "create" as to not confuse with creating an instance of an object
-        """
-        sobject_name = sobject_name.lower()
-        if sobject_name not in self.data:
-            self.data[sobject_name] = []
-
-    @staticmethod
-    def _normalize_data(data: dict):
-        return {key.lower(): value for key, value in data.items()}
+        return records
 
     def get(self, sobject_name: str, record_id: str):
         sobject_name = sobject_name.lower()
@@ -84,6 +80,28 @@ class VirtualSalesforceInstance:
                 index = idx
 
         self.data[sobject_name].pop(index)
+
+    def get_sobjects(self, sobject_name: str):
+        """
+        Returns the objects currently loaded into the virtual instance
+        """
+        sobject_name = sobject_name.lower()
+        self._provision_sobject(sobject_name)
+        return self.data[sobject_name]
+
+    def _provision_sobject(self, sobject_name: str):
+        """
+        Provisions a virtual Salesfoce object
+
+        Use the word "provision" instead of "create" as to not confuse with creating an instance of an object
+        """
+        sobject_name = sobject_name.lower()
+        if sobject_name not in self.data:
+            self.data[sobject_name] = []
+
+    @staticmethod
+    def _normalize_data(data: dict):
+        return {key.lower(): value for key, value in data.items()}
 
 
 virtual_salesforce = VirtualSalesforceInstance()
