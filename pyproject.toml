@@ -8,6 +8,7 @@ authors = ["Alex Drozd <drozdster@gmail.com>"]
 python = "^3.8"
 python-soql-parser = "^0.1.0"
 responses = "^0.13.2"
+simple-salesforce = "^1.11.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

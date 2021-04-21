@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 
 from python_soql_parser import parse
 
+from simple_mockforce.utils import parse_detail_url, parse_create_url
 from simple_mockforce.virtual import virtual_salesforce
 
 
@@ -31,10 +32,7 @@ def query_callback(request):
 def get_callback(request):
     url = request.url
     path = urlparse(url).path
-    split_up = url.split("/")
-    # TODO: use pyparsing
-    sobject = split_up[-2]
-    record_id = split_up[-1]
+    sobject, record_id = parse_detail_url(url)
 
     objects = virtual_salesforce.data[sobject.lower()]
 
@@ -49,12 +47,9 @@ def get_callback(request):
 
 def create_callback(request):
     url = request.url
-    path = urlparse(url).path
     body = json.loads(request.body)
 
-    split_up = url.split("/")
-    # TODO: use pyparsing
-    sobject = split_up[-2]
+    sobject = parse_create_url(url)
 
     normalized = {key.lower(): value for key, value in body.items()}
 
@@ -78,13 +73,9 @@ def create_callback(request):
 
 def update_callback(request):
     url = request.url
-    path = urlparse(url).path
     body = json.loads(request.body)
 
-    split_up = url.split("/")
-    # TODO: use pyparsing
-    sobject = split_up[-2]
-    record_id = split_up[-1]
+    sobject, record_id = parse_detail_url(url)
 
     normalized = {key.lower(): value for key, value in body.items()}
 
