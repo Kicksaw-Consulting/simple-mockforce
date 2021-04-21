@@ -11,17 +11,15 @@ def parse_detail_url(path: str):
         return sobject, None, record_id
     elif len(split_up) == 3:
         sobject = split_up[-3]
-        upsert_key = split_up[-2]
+        custom_id_field = split_up[-2]
         record_id = split_up[-1]
-        return sobject, upsert_key, record_id
+        return sobject, custom_id_field, record_id
     raise AssertionError(f"Unexpected path format: {path}")
 
 
 def parse_create_url(url: str):
     split_up = url.split("/")
-    # TODO: use pyparsing
     sobject = split_up[-2]
-
     return sobject
 
 

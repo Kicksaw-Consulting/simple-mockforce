@@ -23,9 +23,11 @@ def query_callback(request):
 def get_callback(request):
     url = request.url
     path = urlparse(url).path
-    sobject, _, record_id = parse_detail_url(path)
+    sobject, custom_id_field, record_id = parse_detail_url(path)
 
-    object_ = virtual_salesforce.get(sobject, record_id)
+    object_ = virtual_salesforce.get(
+        sobject, record_id, custom_id_field=custom_id_field
+    )
 
     return (
         200,

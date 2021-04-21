@@ -39,10 +39,10 @@ class VirtualSalesforce:
 
         return records
 
-    def get(self, sobject_name: str, record_id: str):
+    def get(self, sobject_name: str, record_id: str, custom_id_field: str = None):
         sobject_name = sobject_name.lower()
         for sobject in self.data[sobject_name]:
-            if sobject["id"] == record_id:
+            if sobject.get(self._get_pk_name(custom_id_field)) == record_id:
                 return sobject
         raise AssertionError(f"Could not find {record_id} in {sobject_name}s")
 
@@ -52,7 +52,7 @@ class VirtualSalesforce:
         try:
             original, index = find_object_and_index(
                 self.data[sobject_name],
-                "id" if not upsert_key else upsert_key,
+                self._get_pk_name(external_id_field=upsert_key),
                 record_id,
             )
             self.data[sobject_name][index] = {
@@ -110,6 +110,12 @@ class VirtualSalesforce:
     @staticmethod
     def _normalize_data(data: dict):
         return {key.lower(): value for key, value in data.items()}
+
+    @staticmethod
+    def _get_pk_name(external_id_field: str = None):
+        if external_id_field:
+            return external_id_field
+        return "id"
 
 
 virtual_salesforce = VirtualSalesforce()

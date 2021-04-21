@@ -68,9 +68,24 @@ def test_update_object_mock():
 def test_upsert_object_mock():
     salesforce = Salesforce(**MOCK_CREDS)
 
-    result = salesforce.Contact.upsert("customExtIdField__c/11999", {"Name": "George"})
+    result = salesforce.Contact.upsert(
+        "customExtIdField__c/imacustomid123", {"Name": "George"}
+    )
 
     assert result == 204
+
+
+@mock_salesforce
+def test_get_by_custom_id_mock():
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    result = salesforce.Contact.get_by_custom_id(
+        "customExtIdField__c", "imacustomid123"
+    )
+
+    assert result["id"]
+    assert result["customExtIdField__c"] == "imacustomid123"
+    assert result["name"] == "George"
 
 
 @mock_salesforce
