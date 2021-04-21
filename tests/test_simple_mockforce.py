@@ -62,3 +62,12 @@ def test_update_object_mock():
     result = salesforce.Contact.update("123", {"LastName": "Smith"})
 
     assert result == 204
+
+
+@mock_salesforce
+def test_upsert_object_mock():
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    result = salesforce.Contact.upsert("customExtIdField__c/11999", {"Name": "George"})
+
+    assert result == 204

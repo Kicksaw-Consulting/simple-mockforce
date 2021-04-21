@@ -5,7 +5,11 @@ from urllib.parse import urlparse
 
 from python_soql_parser import parse
 
-from simple_mockforce.utils import parse_detail_url, parse_create_url
+from simple_mockforce.utils import (
+    parse_detail_url,
+    parse_create_url,
+    find_object_and_index,
+)
 from simple_mockforce.virtual import virtual_salesforce
 
 
@@ -32,7 +36,7 @@ def query_callback(request):
 def get_callback(request):
     url = request.url
     path = urlparse(url).path
-    sobject, record_id = parse_detail_url(url)
+    sobject, _, record_id = parse_detail_url(path)
 
     objects = virtual_salesforce.data[sobject.lower()]
 
@@ -47,9 +51,10 @@ def get_callback(request):
 
 def create_callback(request):
     url = request.url
+    path = urlparse(url).path
     body = json.loads(request.body)
 
-    sobject = parse_create_url(url)
+    sobject = parse_create_url(path)
 
     normalized = {key.lower(): value for key, value in body.items()}
 
@@ -73,9 +78,10 @@ def create_callback(request):
 
 def update_callback(request):
     url = request.url
+    path = urlparse(url).path
     body = json.loads(request.body)
 
-    sobject, record_id = parse_detail_url(url)
+    sobject, upsert_key, record_id = parse_detail_url(path)
 
     normalized = {key.lower(): value for key, value in body.items()}
 
@@ -83,14 +89,20 @@ def update_callback(request):
 
     objects = virtual_salesforce.data[normalized_object_name]
 
-    index = None
-    original = None
-    for idx, object_ in enumerate(objects):
-        if object_["id"] == record_id:
-            index = idx
-            original = object_
-
-    virtual_salesforce.data[normalized_object_name][index] = {**original, **normalized}
+    try:
+        original, index = find_object_and_index(
+            objects, "id" if not upsert_key else upsert_key, record_id
+        )
+        virtual_salesforce.data[normalized_object_name][index] = {
+            **original,
+            **normalized,
+        }
+    except KeyError:
+        id_ = str(uuid.uuid4())
+        normalized["id"] = id_
+        if upsert_key:
+            normalized[upsert_key] = record_id
+        virtual_salesforce.data[normalized_object_name].append(normalized)
 
     return (
         204,
