@@ -5,7 +5,9 @@ BASE_URL = "https?://([a-z0-9]+[.])*salesforce[.]com"
 
 # endpoints for data
 QUERY_URL = f"{BASE_URL}/services/data/v{SF_VERSION}/query/"
-GET_URL = f"{BASE_URL}/services/data/v{SF_VERSION}/sobjects/[a-zA-Z0-9]*/[a-zA-Z0-9]*"
+DETAIL_URL = (
+    f"{BASE_URL}/services/data/v{SF_VERSION}/sobjects/[a-zA-Z0-9]*/[a-zA-Z0-9]*"
+)
 CREATE_URL = f"{BASE_URL}/services/data/v{SF_VERSION}/sobjects/[a-zA-Z0-9]*/"
 DESCRIBE_URL = f"{BASE_URL}/services/data/v{SF_VERSION}/sobjects/Contact/describe"
 

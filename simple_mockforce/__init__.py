@@ -12,7 +12,7 @@ from simple_mockforce.constants import (
     CREATE_URL,
     LOGIN_URL,
     SOAP_API_LOGIN_RESPONSE,
-    GET_URL,
+    DETAIL_URL,
     QUERY_URL,
 )
 
@@ -34,7 +34,7 @@ def mock_salesforce(func):
         )
         responses.add_callback(
             responses.GET,
-            re.compile(GET_URL),
+            re.compile(DETAIL_URL),
             callback=get_callback,
             content_type="content/json",
         )
@@ -46,7 +46,7 @@ def mock_salesforce(func):
         )
         responses.add_callback(
             responses.PATCH,
-            re.compile(GET_URL),
+            re.compile(DETAIL_URL),
             callback=update_callback,
             content_type="content/json",
         )
