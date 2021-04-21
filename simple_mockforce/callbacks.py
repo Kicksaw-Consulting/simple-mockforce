@@ -38,14 +38,12 @@ def get_callback(request):
     path = urlparse(url).path
     sobject, _, record_id = parse_detail_url(path)
 
-    objects = virtual_salesforce.get_sobjects(sobject)
-
-    narrowed = [*filter(lambda object_: object_["id"] == record_id, objects)][0]
+    object_ = virtual_salesforce.get(sobject, record_id)
 
     return (
         200,
         {},
-        json.dumps({"attributes": {"type": sobject, "url": path}, **narrowed}),
+        json.dumps({"attributes": {"type": sobject, "url": path}, **object_}),
     )
 
 
@@ -79,26 +77,7 @@ def update_callback(request):
 
     sobject, upsert_key, record_id = parse_detail_url(path)
 
-    normalized = {key.lower(): value for key, value in body.items()}
-
-    normalized_object_name = sobject.lower()
-
-    objects = virtual_salesforce.get_sobjects(sobject)
-
-    try:
-        original, index = find_object_and_index(
-            objects, "id" if not upsert_key else upsert_key, record_id
-        )
-        virtual_salesforce.data[normalized_object_name][index] = {
-            **original,
-            **normalized,
-        }
-    except KeyError:
-        id_ = str(uuid.uuid4())
-        normalized["id"] = id_
-        if upsert_key:
-            normalized[upsert_key] = record_id
-        virtual_salesforce.data[normalized_object_name].append(normalized)
+    virtual_salesforce.update(sobject, record_id, body, upsert_key=upsert_key)
 
     return (
         204,
@@ -112,15 +91,7 @@ def delete_callback(request):
     path = urlparse(url).path
 
     sobject, _, record_id = parse_detail_url(path)
-
-    objects = virtual_salesforce.get_sobjects(sobject)
-
-    index = None
-    for idx, object_ in enumerate(objects):
-        if object_["id"] == record_id:
-            index = idx
-
-    objects.pop(index)
+    virtual_salesforce.delete(sobject, record_id)
 
     return (
         204,
