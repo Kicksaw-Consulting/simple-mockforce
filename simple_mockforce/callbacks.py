@@ -3,8 +3,11 @@ import json
 from urllib.parse import urlparse
 
 from simple_mockforce.utils import (
+    parse_batch_detail_url,
+    parse_batch_result_url,
     parse_detail_url,
     parse_create_url,
+    parse_job_batch_url,
 )
 from simple_mockforce.virtual import virtual_salesforce
 
@@ -80,4 +83,101 @@ def delete_callback(request):
         204,
         {},
         json.dumps({}),
+    )
+
+
+def job_callback(request):
+    """
+    Note, this will be called again when simple salesforce calls close job,
+    but it's basically a no-op as far as we're concerned at that point
+    """
+    body = json.loads(request.body)
+    print("first")
+
+    sobject = body.get("object")
+
+    job = virtual_salesforce.create_job(sobject)
+
+    return (
+        201,
+        {},
+        json.dumps(job),
+    )
+
+
+def job_detail_callback(request):
+    print("fifth")
+    return (
+        201,
+        {},
+        json.dumps({}),
+    )
+
+
+def bulk_callback(request):
+    url = request.url
+    path = urlparse(url).path
+    body = json.loads(request.body)
+
+    print("second")
+
+    job_id = parse_job_batch_url(path)
+    sobject_name = virtual_salesforce.jobs[job_id]["object"]
+
+    created_ids = list()
+    for sobject in body:
+        id_ = virtual_salesforce.create(sobject_name, sobject)
+        created_ids.append(id_)
+
+    fake_response = {
+        "id": "idontmatter",
+        "jobId": job_id,
+    }
+
+    return (
+        201,
+        {},
+        json.dumps(fake_response),
+    )
+
+
+def bulk_detail_callback(request):
+    url = request.url
+    path = urlparse(url).path
+
+    job_id, batch_id = parse_batch_detail_url(path)
+
+    fake_response = {
+        "id": batch_id,
+        "jobId": job_id,
+        "state": "Completed",
+    }
+
+    print("third")
+
+    return (
+        201,
+        {},
+        json.dumps(fake_response),
+    )
+
+
+def bulk_result_callback(request):
+    url = request.url
+    path = urlparse(url).path
+
+    print("fourth")
+
+    job_id, batch_id = parse_batch_result_url(path)
+
+    fake_response = {
+        "id": batch_id,
+        "jobId": job_id,
+        "state": "Completed",
+    }
+
+    return (
+        201,
+        {},
+        json.dumps(fake_response),
     )

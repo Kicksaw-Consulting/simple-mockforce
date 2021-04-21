@@ -95,3 +95,12 @@ def test_delete_object_mock():
     result = salesforce.Contact.delete("123")
 
     assert result == 204
+
+
+@mock_salesforce
+def test_bulk_insert():
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    result = salesforce.bulk.Contact.insert([{"Name": "Test"}])
+
+    assert result == 204

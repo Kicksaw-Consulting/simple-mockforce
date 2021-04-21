@@ -23,6 +23,26 @@ def parse_create_url(url: str):
     return sobject
 
 
+def parse_job_batch_url(url: str):
+    split_up = url.split("/")
+    job_id = split_up[-2]
+    return job_id
+
+
+def parse_batch_detail_url(url: str):
+    split_up = url.split("/")
+    job_id = split_up[-2]
+    batch_id = split_up[-1]
+    return job_id, batch_id
+
+
+def parse_batch_result_url(url: str):
+    split_up = url.split("/")
+    job_id = split_up[-4]
+    batch_id = split_up[-2]
+    return job_id, batch_id
+
+
 def find_object_and_index(objects: list, pk_name: str, pk: str):
     index = None
     original = None

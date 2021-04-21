@@ -1,5 +1,6 @@
 # TODO: determine if provisioning should be implicit like it is now, or if it should be explicitly done
-import uuid
+import random
+import string
 
 from python_soql_parser import parse
 from simple_mockforce.utils import (
@@ -12,7 +13,7 @@ class VirtualSalesforce:
     A global, in-memory store for all the written data when calling with @mock_salesforce
 
     As of now, all objects are assumed to exist (and provisioned if they don't already).
-    This class also does not yet mimic any of the validation you'd see with Salesforce server-side
+    This class does not yet mimic any of the validation you'd see with Salesforce server-side
     """
 
     def __init__(self):
@@ -22,6 +23,10 @@ class VirtualSalesforce:
         self.data = {
             "contact": [{"id": "123", "name": "Bob"}, {"id": "124", "name": "John"}]
         }
+
+        self.jobs = {}
+
+    # SOQL
 
     def query(self, soql: str):
         parse_results = parse(soql)
@@ -38,6 +43,8 @@ class VirtualSalesforce:
             records = records[:limit]
 
         return records
+
+    # CRUD
 
     def get(self, sobject_name: str, record_id: str, custom_id_field: str = None):
         sobject_name = sobject_name.lower()
@@ -85,6 +92,16 @@ class VirtualSalesforce:
 
         self.data[sobject_name].pop(index)
 
+    # bulk stuff
+
+    def create_job(self, sobject_name: str):
+        job_id = self._generate_sfdc_id()
+        job = {"id": job_id, "object": sobject_name}
+        self.jobs[job_id] = job
+        return job
+
+    # utils
+
     def get_sobjects(self, sobject_name: str):
         """
         Returns the objects currently loaded into the virtual instance
@@ -105,7 +122,7 @@ class VirtualSalesforce:
 
     @staticmethod
     def _generate_sfdc_id():
-        return str(uuid.uuid4())
+        return "".join(random.choices(string.ascii_letters + string.digits, k=18))
 
     @staticmethod
     def _normalize_data(data: dict):
