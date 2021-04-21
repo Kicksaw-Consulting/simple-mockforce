@@ -1,3 +1,5 @@
+import json
+
 from simple_mockforce import mock_salesforce
 from simple_salesforce import Salesforce
 
@@ -8,6 +10,13 @@ MOCK_CREDS = {
     "security_token": "123",
     "domain": "mock",
 }
+
+
+def to_dict(input_ordered_dict):
+    """
+    Useful for getting rid of OrderedDicts
+    """
+    return json.loads(json.dumps(input_ordered_dict))
 
 
 @mock_salesforce
@@ -39,18 +48,17 @@ def test_get_object_mock():
 def test_create_object_mock():
     salesforce = Salesforce(**MOCK_CREDS)
 
-    result = salesforce.Contact.create(
-        {"Id": "12345", "FirstName": "John", "LastName": "Doe"}
-    )
+    result = salesforce.Contact.create({"FirstName": "John", "LastName": "Doe"})
 
-    return
+    assert result["id"]
+    assert result["success"] == True
+    assert result["errors"] == []
 
-    assert dict(result) == {
-        "id": "12345",
-        "firstname": "John",
-        "lastname": "Doe",
-        "attributes": {
-            "type": "Contact",
-            "url": "/services/data/v42.0/sobjects/Contact/12345",
-        },
-    }
+
+# @mock_salesforce
+# def test_update_object_mock():
+#     salesforce = Salesforce(**MOCK_CREDS)
+
+#     result = salesforce.Contact.update("12345", {"LastName": "Smith"})
+
+#     assert result == 204

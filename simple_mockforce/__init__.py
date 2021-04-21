@@ -2,7 +2,12 @@ import re
 
 import responses
 
-from simple_mockforce.callbacks import create_callback, get_callback, query_callback
+from simple_mockforce.callbacks import (
+    create_callback,
+    get_callback,
+    query_callback,
+    update_callback,
+)
 from simple_mockforce.constants import (
     CREATE_URL,
     LOGIN_URL,
@@ -37,6 +42,12 @@ def mock_salesforce(func):
             responses.POST,
             re.compile(CREATE_URL),
             callback=create_callback,
+            content_type="content/json",
+        )
+        responses.add_callback(
+            responses.PATCH,
+            re.compile(GET_URL),
+            callback=update_callback,
             content_type="content/json",
         )
         func(*args, **kwargs)

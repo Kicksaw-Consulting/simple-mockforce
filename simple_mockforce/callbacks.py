@@ -1,4 +1,5 @@
 import json
+import uuid
 
 from urllib.parse import urlparse
 
@@ -57,6 +58,10 @@ def create_callback(request):
 
     normalized = {key.lower(): value for key, value in body.items()}
 
+    id_ = str(uuid.uuid4())
+
+    normalized["id"] = id_
+
     normalized_object_name = sobject.lower()
     if sobject.lower() in virtual_salesforce.data:
         virtual_salesforce.data[normalized_object_name].append(normalized)
@@ -66,5 +71,34 @@ def create_callback(request):
     return (
         200,
         {},
-        json.dumps({"attributes": {"type": sobject, "url": path}, **body}),
+        # yep, salesforce lowercases id on create's response
+        json.dumps({"id": id_, "success": True, "errors": []}),
+    )
+
+
+def update_callback(request):
+    url = request.url
+    path = urlparse(url).path
+    body = json.loads(request.body)
+
+    split_up = url.split("/")
+    # TODO: use pyparsing
+    sobject = split_up[-2]
+    record_id = split_up[-1]
+
+    normalized = {key.lower(): value for key, value in body.items()}
+
+    normalized_object_name = sobject.lower()
+
+    objects = virtual_salesforce.data[normalized_object_name]
+    narrowed = [*filter(lambda object_: object_["id"] == record_id, objects)][0]
+
+    narrowed = {**narrowed, **normalized}
+
+    print(virtual_salesforce.data[normalized_object_name])
+
+    return (
+        204,
+        {},
+        json.dumps({}),
     )
