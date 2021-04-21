@@ -7,7 +7,7 @@ from simple_mockforce.utils import (
 )
 
 
-class VirtualSalesforceInstance:
+class VirtualSalesforce:
     """
     A global, in-memory store for all the written data when calling with @mock_salesforce
 
@@ -60,16 +60,20 @@ class VirtualSalesforceInstance:
                 **data,
             }
         except KeyError:
-            id_ = str(uuid.uuid4())
+            id_ = self._generate_sfdc_id()
             data["id"] = id_
             if upsert_key:
                 data[upsert_key] = record_id
             self.data[sobject_name].append(data)
 
     def create(self, sobject_name: str, sobject: dict):
+        sobject = self._normalize_data(sobject)
         sobject_name = sobject_name.lower()
+        id_ = self._generate_sfdc_id()
+        sobject["id"] = id_
         self._provision_sobject(sobject_name)
         self.data[sobject_name].append(sobject)
+        return id_
 
     def delete(self, sobject_name: str, record_id: str):
         sobject_name = sobject_name.lower()
@@ -100,8 +104,12 @@ class VirtualSalesforceInstance:
             self.data[sobject_name] = []
 
     @staticmethod
+    def _generate_sfdc_id():
+        return str(uuid.uuid4())
+
+    @staticmethod
     def _normalize_data(data: dict):
         return {key.lower(): value for key, value in data.items()}
 
 
-virtual_salesforce = VirtualSalesforceInstance()
+virtual_salesforce = VirtualSalesforce()

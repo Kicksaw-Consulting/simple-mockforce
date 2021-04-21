@@ -1,14 +1,10 @@
 import json
-import uuid
 
 from urllib.parse import urlparse
-
-from python_soql_parser import parse
 
 from simple_mockforce.utils import (
     parse_detail_url,
     parse_create_url,
-    find_object_and_index,
 )
 from simple_mockforce.virtual import virtual_salesforce
 
@@ -45,13 +41,7 @@ def create_callback(request):
 
     sobject = parse_create_url(path)
 
-    normalized = {key.lower(): value for key, value in body.items()}
-
-    id_ = str(uuid.uuid4())
-
-    normalized["id"] = id_
-
-    virtual_salesforce.create(sobject, normalized)
+    id_ = virtual_salesforce.create(sobject, body)
 
     return (
         200,
