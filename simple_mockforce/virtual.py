@@ -4,6 +4,7 @@ import string
 
 from python_soql_parser import parse
 from simple_mockforce.utils import (
+    filter_by_where_clause,
     find_object_and_index,
 )
 
@@ -55,25 +56,7 @@ class VirtualSalesforce:
 
         for sobject in sobjects:
             sobject = {key.lower(): value for key, value in sobject.items()}
-
-            equals = list()
-
-            if where:
-                where_clause = where[0]
-                for clause in where_clause:
-                    if clause == "where":
-                        continue
-                    field = clause[0]
-                    op = clause[1]
-                    value = clause[2].strip("'")
-                    if op == "=":
-                        equals.append((field, value))
-
-            skip = False
-            for condition in equals:
-                if sobject[condition[0]] != condition[1]:
-                    skip = True
-
+            skip = filter_by_where_clause(sobject, where)
             if skip:
                 continue
 

@@ -9,7 +9,7 @@ def test_bulk_lifecycle():
     salesforce = Salesforce(**MOCK_CREDS)
 
     result = salesforce.bulk.Account.insert([{"Name": "Test Account"}])
-    return
+
     assert len(result) == 1
     assert result[0]["success"]
 
