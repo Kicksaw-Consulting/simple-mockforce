@@ -25,6 +25,8 @@ class VirtualSalesforce:
         }
 
         self.jobs = {}
+        self.batches = {}
+        self.batch_data = {}
 
     # SOQL
 
@@ -94,11 +96,21 @@ class VirtualSalesforce:
 
     # bulk stuff
 
-    def create_job(self, sobject_name: str):
+    def create_job(self, job: dict):
         job_id = self._generate_sfdc_id()
-        job = {"id": job_id, "object": sobject_name}
+        job = {**job, "id": job_id}
         self.jobs[job_id] = job
         return job
+
+    def create_batch(self, job_id, data, operation):
+        batch_id = self._generate_sfdc_id()
+        batch = {
+            "id": batch_id,
+            "jobId": job_id,
+        }
+        self.batches[batch_id] = batch
+        self.batch_data[batch_id] = data
+        return batch
 
     # utils
 

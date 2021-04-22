@@ -31,7 +31,7 @@ def parse_job_batch_url(url: str):
 
 def parse_batch_detail_url(url: str):
     split_up = url.split("/")
-    job_id = split_up[-2]
+    job_id = split_up[-3]
     batch_id = split_up[-1]
     return job_id, batch_id
 

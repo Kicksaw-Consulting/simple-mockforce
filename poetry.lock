@@ -219,7 +219,7 @@ tests = ["coverage (>=3.7.1,<6.0.0)", "pytest-cov", "pytest-localserver", "flake
 
 [[package]]
 name = "simple-salesforce"
-version = "1.11.1"
+version = "1.0.0"
 description = "A basic Salesforce.com REST API client."
 category = "main"
 optional = false
@@ -261,7 +261,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "82f772e43cd55efc99a7908c48b3d72dfe1058f8ca37e0c46f054b6770045399"
+content-hash = "2c9e5894113a7f1496cd05b5216343e3b0e70c8727c9fb2e961208f6c06b4a77"
 
 [metadata.files]
 atomicwrites = [
@@ -386,8 +386,8 @@ responses = [
     {file = "responses-0.13.2.tar.gz", hash = "sha256:0f0ab4717728d33dae8e66deea61eecc1e38f0398e35249e3963ff74cfc8d0d8"},
 ]
 simple-salesforce = [
-    {file = "simple-salesforce-1.11.1.tar.gz", hash = "sha256:558ce417c9d2d14074065cfba2316125758b22458164e2bba884a818c87ae75f"},
-    {file = "simple_salesforce-1.11.1-py2.py3-none-any.whl", hash = "sha256:3ff6743f4bb4d2518fd440bea1cfeb6b3f99ce25a4d2cd1b1005420ddad589d8"},
+    {file = "simple-salesforce-1.0.0.tar.gz", hash = "sha256:d1467ec772bcbe0382bbbfc3bffb09b41344635723da0bfc48b65635df43659c"},
+    {file = "simple_salesforce-1.0.0-py2.py3-none-any.whl", hash = "sha256:db57ead73d0a11b5d62d91dea149b165c912c294782aa5d5a198e1b6737f643d"},
 ]
 six = [
     {file = "six-1.15.0-py2.py3-none-any.whl", hash = "sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced"},

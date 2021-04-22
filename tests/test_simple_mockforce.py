@@ -103,4 +103,5 @@ def test_bulk_insert():
 
     result = salesforce.bulk.Contact.insert([{"Name": "Test"}])
 
-    assert result == 204
+    assert len(result) == 1
+    assert result[0]["success"]
