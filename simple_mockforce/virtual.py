@@ -27,9 +27,18 @@ class VirtualSalesforce:
             ]
         }
 
-        self.jobs = {}
-        self.batches = {}
-        self.batch_data = {}
+        self.jobs = dict()
+        self.batches = dict()
+        self.batch_data = dict()
+
+    def reset(self):
+        """
+        Clears stored data. Useful to prevent test pollution
+        """
+        self.data = dict()
+        self.jobs = dict()
+        self.batches = dict()
+        self.batch_data = dict()
 
     # SOQL
 
