@@ -17,23 +17,11 @@ class VirtualSalesforce:
     """
 
     def __init__(self):
-        # will store {'contact': [{"Id": "123456789123456789", # ... }], # ... }
-        # this is the mega-dictionary that stores it all
-        # self.data = dict()
-        self.data = {
-            "Contact": [
-                {"Id": "123", "Name": "Bob"},
-                {"Id": "124", "Name": "John", "customExtIdField__c": "9999"},
-            ]
-        }
+        self.create_new_virtual_instance()
 
-        self.jobs = dict()
-        self.batches = dict()
-        self.batch_data = dict()
-
-    def reset(self):
+    def create_new_virtual_instance(self):
         """
-        Clears stored data. Useful to prevent test pollution
+        Starts a virtual Salesforce instance from scratch. Useful to prevent test pollution
         """
         self.data = dict()
         self.jobs = dict()
@@ -106,10 +94,13 @@ class VirtualSalesforce:
             upsert_key,
             record_id,
         )
-        if not index:
+
+        if index is None:
             return self.create(sobject_name, sobject)
         else:
-            return self.data[sobject_name][0]["Id"]
+            sfdc_id = self.data[sobject_name][0]["Id"]
+            self.update(sobject_name, sfdc_id, sobject)
+            return sfdc_id
 
     def create(self, sobject_name: str, sobject: dict):
         id_ = self._generate_sfdc_id()
