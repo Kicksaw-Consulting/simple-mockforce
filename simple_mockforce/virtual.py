@@ -46,6 +46,8 @@ class VirtualSalesforce:
         ), f"{parsed_sobject} not present in the virtual Salesforce objects"
 
         fields = parse_results["fields"].asList()
+        where = parse_results["where"].asList()
+
         limit = parse_results["limit"].asList()
         sobjects = self.get_sobjects(sobject)
 
@@ -53,8 +55,30 @@ class VirtualSalesforce:
         # TODO: do this in a more algorithm efficient way
         for sobject in sobjects:
             normalized_sobject = {key.lower(): value for key, value in sobject.items()}
+
+            equals = list()
+
+            if where:
+                where_clause = where[0]
+                for clause in where_clause:
+                    if clause == "where":
+                        continue
+                    field = clause[0]
+                    op = clause[1]
+                    value = clause[2].strip("'")
+                    if op == "=":
+                        equals.append((field, value))
+
             record = {field: normalized_sobject.get(field) for field in fields}
-            records.append(record)
+
+            skip = False
+
+            for condition in equals:
+                if record[condition[0]] != condition[1]:
+                    skip = True
+
+            if not skip:
+                records.append(record)
 
         if limit:
             limit: int = limit[0]
