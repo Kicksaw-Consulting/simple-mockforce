@@ -21,7 +21,10 @@ class VirtualSalesforce:
         # this is the mega-dictionary that stores it all
         # self.data = dict()
         self.data = {
-            "contact": [{"id": "123", "name": "Bob"}, {"id": "124", "name": "John"}]
+            "contact": [
+                {"id": "123", "name": "Bob"},
+                {"id": "124", "name": "John", "customextidfield__c": "9999"},
+            ]
         }
 
         self.jobs = {}

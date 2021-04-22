@@ -105,3 +105,15 @@ def test_bulk_insert():
 
     assert len(result) == 1
     assert result[0]["success"]
+
+
+@mock_salesforce
+def test_bulk_upsert():
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    result = salesforce.bulk.Contact.upsert(
+        [{"Name": "Test", "customExtIdField__c": "9999"}], "customExtIdField__c"
+    )
+
+    assert len(result) == 1
+    assert result[0]["success"]
