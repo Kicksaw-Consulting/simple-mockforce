@@ -58,25 +58,29 @@ class VirtualSalesforce:
                 return sobject
         raise AssertionError(f"Could not find {record_id} in {sobject_name}s")
 
-    def update(self, sobject_name: str, record_id: str, data: dict, upsert_key=None):
+    def update(self, sobject_name: str, record_id: str, data: dict):
         sobject_name = sobject_name.lower()
         data = self._normalize_data(data)
-        try:
-            original, index = find_object_and_index(
-                self.data[sobject_name],
-                self._get_pk_name(external_id_field=upsert_key),
-                record_id,
-            )
-            self.data[sobject_name][index] = {
-                **original,
-                **data,
-            }
-        except KeyError:
-            id_ = self._generate_sfdc_id()
-            data["id"] = id_
-            if upsert_key:
-                data[upsert_key] = record_id
-            self.data[sobject_name].append(data)
+        original, index = find_object_and_index(
+            self.data[sobject_name],
+            "id",
+            record_id,
+        )
+        self.data[sobject_name][index] = {
+            **original,
+            **data,
+        }
+
+    def upsert(self, sobject_name: str, record_id: str, sobject: dict, upsert_key):
+        sobject_name = sobject_name.lower()
+        sobject = self._normalize_data(sobject)
+        _, index = find_object_and_index(
+            self.data[sobject_name],
+            upsert_key,
+            record_id,
+        )
+        if not index:
+            self.create(sobject_name, sobject)
 
     def create(self, sobject_name: str, sobject: dict):
         sobject = self._normalize_data(sobject)

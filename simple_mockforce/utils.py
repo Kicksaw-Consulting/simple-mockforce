@@ -47,9 +47,8 @@ def find_object_and_index(objects: list, pk_name: str, pk: str):
     index = None
     original = None
     for idx, object_ in enumerate(objects):
-        if object_[pk_name] == pk:
+        if object_.get(pk_name) == pk:
             index = idx
             original = object_
 
-    assert index is not None and original, f"couldn't find anything for {pk}"
     return original, index

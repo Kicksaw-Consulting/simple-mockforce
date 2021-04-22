@@ -63,7 +63,10 @@ def update_callback(request):
 
     sobject, upsert_key, record_id = parse_detail_url(path)
 
-    virtual_salesforce.update(sobject, record_id, body, upsert_key=upsert_key)
+    if not upsert_key:
+        virtual_salesforce.update(sobject, record_id, body)
+    else:
+        virtual_salesforce.upsert(sobject, record_id, body, upsert_key=upsert_key)
 
     return (
         204,
