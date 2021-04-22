@@ -99,7 +99,7 @@ class VirtualSalesforce:
         if index is None:
             return self.create(sobject_name, sobject)
         else:
-            sfdc_id = self.data[sobject_name][0]["Id"]
+            sfdc_id = self.data[sobject_name][index]["Id"]
             self.update(sobject_name, sfdc_id, sobject)
             return sfdc_id
 
