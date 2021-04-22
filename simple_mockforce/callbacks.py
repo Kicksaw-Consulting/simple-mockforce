@@ -167,9 +167,16 @@ def bulk_result_callback(request):
                 external_field_id,
             )
             sfdc_ids.append(id_)
+        elif operation == "update":
+            # TODO: we'll have to address this if we ever normalize the casing
+            id_ = sobject["Id"]
+            virtual_salesforce.update(sobject_name, id_, sobject)
+            sfdc_ids.append(id_)
         elif operation == "insert":
             id_ = virtual_salesforce.create(sobject_name, sobject)
             sfdc_ids.append(id_)
+        else:
+            raise AssertionError(f"Invalid operation: {operation}")
 
     fake_response = [
         {
