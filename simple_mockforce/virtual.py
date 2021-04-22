@@ -52,9 +52,9 @@ class VirtualSalesforce:
         sobjects = self.get_sobjects(sobject)
 
         records = list()
-        # TODO: do this in a more algorithm efficient way
+
         for sobject in sobjects:
-            normalized_sobject = {key.lower(): value for key, value in sobject.items()}
+            sobject = {key.lower(): value for key, value in sobject.items()}
 
             equals = list()
 
@@ -69,16 +69,16 @@ class VirtualSalesforce:
                     if op == "=":
                         equals.append((field, value))
 
-            record = {field: normalized_sobject.get(field) for field in fields}
-
             skip = False
-
             for condition in equals:
-                if record[condition[0]] != condition[1]:
+                if sobject[condition[0]] != condition[1]:
                     skip = True
 
-            if not skip:
-                records.append(record)
+            if skip:
+                continue
+
+            record = {field: sobject.get(field) for field in fields}
+            records.append(record)
 
         if limit:
             limit: int = limit[0]

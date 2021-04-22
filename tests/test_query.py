@@ -1,7 +1,6 @@
 from simple_mockforce import mock_salesforce
 from simple_salesforce import Salesforce
 
-
 from tests.utils import MOCK_CREDS
 
 
@@ -25,7 +24,7 @@ def test_where_query():
     response = salesforce.Lead.create({"Name": "Corey Taylor"})
     sfdc_id = response["id"]
 
-    results = salesforce.query(f"SELECT Id, Name FROM Lead WHERE Id = 'imbad'")
+    results = salesforce.query(f"SELECT Id, Name FROM Lead WHERE Id = 'hi'")
     records = results["records"]
     assert len(records) == 0
 
