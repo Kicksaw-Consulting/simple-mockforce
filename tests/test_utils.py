@@ -58,6 +58,6 @@ def test_parse_batch_result_url():
 
 
 def test_find_object_and_index():
-    object_, index = find_object_and_index([{"id": "123"}], "id", "123")
-    assert object_ == {"id": "123"}
+    object_, index = find_object_and_index([{"Id": "123"}], "Id", "123")
+    assert object_ == {"Id": "123"}
     assert index == 0

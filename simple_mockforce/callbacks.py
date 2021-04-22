@@ -55,7 +55,7 @@ def create_callback(request):
         200,
         {},
         # yep, salesforce lowercases id on create's response
-        json.dumps({"id": id_, "success": True, "errors": []}),
+        json.dumps({"Id": id_, "success": True, "errors": []}),
     )
 
 
@@ -133,7 +133,7 @@ def bulk_detail_callback(request):
     job_id, batch_id = parse_batch_detail_url(path)
 
     fake_response = {
-        "id": batch_id,
+        "Id": batch_id,
         "jobId": job_id,
         "state": "Completed",
     }
@@ -175,7 +175,7 @@ def bulk_result_callback(request):
         {
             "success": True,
             "created": True,
-            "id": id_,
+            "Id": id_,
             "errors": [],
         }
         for id_ in sfdc_ids

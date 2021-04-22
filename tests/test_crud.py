@@ -10,8 +10,8 @@ def test_get_object_mock():
 
     result = salesforce.Contact.get("123")
 
-    assert result["id"] == "123"
-    assert result["name"] == "Bob"
+    assert result["Id"] == "123"
+    assert result["Name"] == "Bob"
 
 
 @mock_salesforce
@@ -20,7 +20,7 @@ def test_create_object_mock():
 
     result = salesforce.Contact.create({"FirstName": "John", "LastName": "Doe"})
 
-    assert result["id"]
+    assert result["Id"]
     assert result["success"] == True
     assert result["errors"] == []
 
@@ -54,9 +54,9 @@ def test_get_by_custom_id_mock():
         "customExtIdField__c", "imacustomid123"
     )
 
-    assert result["id"]
-    assert result["customextidfield__c"] == "imacustomid123"
-    assert result["name"] == "George"
+    assert result["Id"]
+    assert result["customExtIdField__c"] == "imacustomid123"
+    assert result["Name"] == "George"
 
 
 @mock_salesforce

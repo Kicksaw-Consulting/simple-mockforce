@@ -17,13 +17,13 @@ class VirtualSalesforce:
     """
 
     def __init__(self):
-        # will store {'contact': [{"id": "123456789123456789", # ... }], # ... }
+        # will store {'contact': [{"Id": "123456789123456789", # ... }], # ... }
         # this is the mega-dictionary that stores it all
         # self.data = dict()
         self.data = {
-            "contact": [
-                {"id": "123", "name": "Bob"},
-                {"id": "124", "name": "John", "customextidfield__c": "9999"},
+            "Contact": [
+                {"Id": "123", "Name": "Bob"},
+                {"Id": "124", "Name": "John", "customExtIdField__c": "9999"},
             ]
         }
 
@@ -35,14 +35,29 @@ class VirtualSalesforce:
 
     def query(self, soql: str):
         parse_results = parse(soql)
-        sobject = parse_results["sobject"]
+        parsed_sobject = parse_results["sobject"]
+
+        sobject = None
+        for sobject_name in self.data.keys():
+            if sobject_name.lower() == parsed_sobject.lower():
+                sobject = sobject_name
+
+        # TODO: throw some Salesforce error about the object not existing?
+        assert (
+            sobject
+        ), f"{parsed_sobject} not present in the virtual Salesforce objects"
+
         fields = parse_results["fields"].asList()
         limit = parse_results["limit"].asList()
-        objects = self.get_sobjects(sobject)
-        # TODO: construct attributes
-        records = [
-            *map(lambda record: {field: record.get(field) for field in fields}, objects)
-        ]
+        sobjects = self.get_sobjects(sobject)
+
+        records = list()
+        # TODO: do this in a more algorithm efficient way
+        for sobject in sobjects:
+            normalized_sobject = {key.lower(): value for key, value in sobject.items()}
+            record = {field: normalized_sobject.get(field) for field in fields}
+            records.append(record)
+
         if limit:
             limit: int = limit[0]
             records = records[:limit]
@@ -52,16 +67,13 @@ class VirtualSalesforce:
     # CRUD
 
     def get(self, sobject_name: str, record_id: str):
-        sobject_name = sobject_name.lower()
         for sobject in self.data[sobject_name]:
-            if sobject["id"] == record_id:
+            if sobject["Id"] == record_id:
                 return sobject
         # TODO: somehow mock the error we'd get from Salesforce instead?
         raise AssertionError(f"Could not find {record_id} in {sobject_name}s")
 
     def get_by_custom_id(self, sobject_name: str, record_id: str, custom_id_field: str):
-        sobject_name = sobject_name.lower()
-        custom_id_field = custom_id_field.lower()
         for sobject in self.data[sobject_name]:
             if sobject.get(custom_id_field) == record_id:
                 return sobject
@@ -69,11 +81,9 @@ class VirtualSalesforce:
         raise AssertionError(f"Could not find {record_id} in {sobject_name}s")
 
     def update(self, sobject_name: str, record_id: str, data: dict):
-        sobject_name = sobject_name.lower()
-        data = self._normalize_data(data)
         original, index = find_object_and_index(
             self.data[sobject_name],
-            "id",
+            "Id",
             record_id,
         )
         self.data[sobject_name][index] = {
@@ -82,9 +92,6 @@ class VirtualSalesforce:
         }
 
     def upsert(self, sobject_name: str, record_id: str, sobject: dict, upsert_key: str):
-        sobject_name = sobject_name.lower()
-        sobject = self._normalize_data(sobject)
-        upsert_key = upsert_key.lower()
         _, index = find_object_and_index(
             self.data[sobject_name],
             upsert_key,
@@ -93,23 +100,19 @@ class VirtualSalesforce:
         if not index:
             return self.create(sobject_name, sobject)
         else:
-            return self.data[sobject_name][0]["id"]
+            return self.data[sobject_name][0]["Id"]
 
     def create(self, sobject_name: str, sobject: dict):
-        sobject = self._normalize_data(sobject)
-        sobject_name = sobject_name.lower()
         id_ = self._generate_sfdc_id()
-        sobject["id"] = id_
+        sobject["Id"] = id_
         self._provision_sobject(sobject_name)
         self.data[sobject_name].append(sobject)
         return id_
 
     def delete(self, sobject_name: str, record_id: str):
-        sobject_name = sobject_name.lower()
-
         index = None
         for idx, object_ in enumerate(self.data[sobject_name]):
-            if object_["id"] == record_id:
+            if object_["Id"] == record_id:
                 index = idx
 
         self.data[sobject_name].pop(index)
@@ -138,7 +141,6 @@ class VirtualSalesforce:
         """
         Returns the objects currently loaded into the virtual instance
         """
-        sobject_name = sobject_name.lower()
         self._provision_sobject(sobject_name)
         return self.data[sobject_name]
 
@@ -148,7 +150,6 @@ class VirtualSalesforce:
 
         Use the word "provision" instead of "create" as to not confuse with creating an instance of an object
         """
-        sobject_name = sobject_name.lower()
         if sobject_name not in self.data:
             self.data[sobject_name] = []
 
@@ -157,14 +158,10 @@ class VirtualSalesforce:
         return "".join(random.choices(string.ascii_letters + string.digits, k=18))
 
     @staticmethod
-    def _normalize_data(data: dict):
-        return {key.lower(): value for key, value in data.items()}
-
-    @staticmethod
     def _get_pk_name(external_id_field: str = None):
         if external_id_field:
             return external_id_field
-        return "id"
+        return "Id"
 
 
 virtual_salesforce = VirtualSalesforce()
