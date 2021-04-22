@@ -1,4 +1,3 @@
-import json
 from simple_mockforce import mock_salesforce
 from simple_salesforce import Salesforce
 
