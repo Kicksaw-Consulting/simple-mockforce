@@ -52,3 +52,10 @@ def find_object_and_index(objects: list, pk_name: str, pk: str):
             original = object_
 
     return original, index
+
+
+def terminate_regex(url_pattern):
+    """
+    Simple terminates the given pattern (which is supplied from constants.py)
+    """
+    return re.compile(url_pattern + "$")

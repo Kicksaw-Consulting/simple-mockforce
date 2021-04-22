@@ -93,11 +93,10 @@ def delete_callback(request):
 
 
 def job_callback(request):
-    """
-    Note, this will be called again when simple salesforce calls close job,
-    but it's basically a no-op as far as we're concerned at that point
-    """
     body = json.loads(request.body)
+
+    print(request.url, request.method)
+    print("first")
 
     job = virtual_salesforce.create_job(body)
 
@@ -117,6 +116,9 @@ def bulk_callback(request):
     job = virtual_salesforce.jobs[job_id]
     operation = job["operation"]
 
+    print(request.url)
+    print("second")
+
     batch = virtual_salesforce.create_batch(job_id, body, operation)
 
     return (
@@ -131,6 +133,9 @@ def bulk_detail_callback(request):
     path = urlparse(url).path
 
     job_id, batch_id = parse_batch_detail_url(path)
+
+    print(request.url)
+    print("third")
 
     fake_response = {
         "Id": batch_id,
@@ -150,6 +155,9 @@ def bulk_result_callback(request):
     path = urlparse(url).path
 
     job_id, batch_id = parse_batch_result_url(path)
+
+    print(request.url)
+    print("fourth")
 
     job = virtual_salesforce.jobs[job_id]
     sobject_name = job["object"]
@@ -182,7 +190,8 @@ def bulk_result_callback(request):
         {
             "success": True,
             "created": True,
-            "Id": id_,
+            # yep, Salesforce returns the id lowercased in bulk responses
+            "id": id_,
             "errors": [],
         }
         for id_ in sfdc_ids
@@ -199,6 +208,8 @@ def job_detail_callback(request):
     """
     This is a no-op as far as we're concerned
     """
+    print(request.url)
+    print("fifth")
     return (
         201,
         {},

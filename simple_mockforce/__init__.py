@@ -1,5 +1,4 @@
 import re
-
 import responses
 
 from simple_mockforce.callbacks import (
@@ -26,6 +25,7 @@ from simple_mockforce.constants import (
     JOB_URL,
     BATCH_URL,
 )
+from simple_mockforce.utils import terminate_regex
 
 
 def mock_salesforce(func):
@@ -33,7 +33,7 @@ def mock_salesforce(func):
     def wrapper(*args, **kwargs):
         responses.add(
             responses.POST,
-            re.compile(LOGIN_URL),
+            terminate_regex(LOGIN_URL),
             body=SOAP_API_LOGIN_RESPONSE,
             content_type="text/xml",
         )
@@ -51,7 +51,7 @@ def mock_salesforce(func):
         )
         responses.add_callback(
             responses.POST,
-            re.compile(CREATE_URL),
+            terminate_regex(CREATE_URL),
             callback=create_callback,
             content_type="content/json",
         )
@@ -63,38 +63,38 @@ def mock_salesforce(func):
         )
         responses.add_callback(
             responses.DELETE,
-            re.compile(DETAIL_URL),
+            terminate_regex(DETAIL_URL),
             callback=delete_callback,
             content_type="content/json",
         )
         # bulk calls
         responses.add_callback(
             responses.GET,
-            re.compile(BATCH_RESULT_URL),
+            terminate_regex(BATCH_RESULT_URL),
             callback=bulk_result_callback,
             content_type="content/json",
         )
         responses.add_callback(
             responses.GET,
-            re.compile(BATCH_DETAIL_URL),
+            terminate_regex(BATCH_DETAIL_URL),
             callback=bulk_detail_callback,
             content_type="content/json",
         )
         responses.add_callback(
             responses.POST,
-            re.compile(BATCH_URL),
+            terminate_regex(BATCH_URL),
             callback=bulk_callback,
             content_type="content/json",
         )
         responses.add_callback(
             responses.POST,
-            re.compile(JOB_DETAIL_URL),
+            terminate_regex(JOB_DETAIL_URL),
             callback=job_detail_callback,
             content_type="content/json",
         )
         responses.add_callback(
             responses.POST,
-            re.compile(JOB_URL),
+            terminate_regex(JOB_URL),
             callback=job_callback,
             content_type="content/json",
         )

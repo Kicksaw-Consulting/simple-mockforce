@@ -1,26 +1,25 @@
 # foundations
 SF_VERSION = "[0-9]*[.]0"
 BASE_URL = "https?://([a-z0-9]+[.])*salesforce[.]com"
+SFDC_ID = "[a-zA-Z0-9]+"
 
 
 # CRUD and query stuff
 QUERY_URL = f"{BASE_URL}/services/data/v{SF_VERSION}/query/"
-DETAIL_URL = (
-    f"{BASE_URL}/services/data/v{SF_VERSION}/sobjects/[a-zA-Z0-9]*/[a-zA-Z0-9]*"
-)
-CREATE_URL = f"{BASE_URL}/services/data/v{SF_VERSION}/sobjects/[a-zA-Z0-9]*/"
+DETAIL_URL = f"{BASE_URL}/services/data/v{SF_VERSION}/sobjects/{SFDC_ID}/{SFDC_ID}"
+CREATE_URL = f"{BASE_URL}/services/data/v{SF_VERSION}/sobjects/{SFDC_ID}/"
 DESCRIBE_URL = f"{BASE_URL}/services/data/v{SF_VERSION}/sobjects/Contact/describe"
 
 
 # bulk stuff
 JOB_URL = f"{BASE_URL}/services/async/{SF_VERSION}/job"
-JOB_DETAIL_URL = f"{BASE_URL}/services/async/{SF_VERSION}/job/[a-zA-Z0-9]*"
-BATCH_URL = f"{BASE_URL}/services/async/{SF_VERSION}/job/[a-zA-Z0-9]*/batch"
+JOB_DETAIL_URL = f"{BASE_URL}/services/async/{SF_VERSION}/job/{SFDC_ID}"
+BATCH_URL = f"{BASE_URL}/services/async/{SF_VERSION}/job/{SFDC_ID}/batch"
 BATCH_DETAIL_URL = (
-    f"{BASE_URL}/services/async/{SF_VERSION}/job/[a-zA-Z0-9]*/batch/[a-zA-Z0-9]*"
+    f"{BASE_URL}/services/async/{SF_VERSION}/job/{SFDC_ID}/batch/{SFDC_ID}"
 )
 BATCH_RESULT_URL = (
-    f"{BASE_URL}/services/async/{SF_VERSION}/job/[a-zA-Z0-9]*/batch/[a-zA-Z0-9]*/result"
+    f"{BASE_URL}/services/async/{SF_VERSION}/job/{SFDC_ID}/batch/{SFDC_ID}/result"
 )
 
 
