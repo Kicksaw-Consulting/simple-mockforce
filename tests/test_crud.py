@@ -10,7 +10,7 @@ def test_crud_lifecycle():
 
     result = salesforce.Contact.create({"FirstName": "John", "LastName": "Doe"})
 
-    record_id = result["Id"]
+    record_id = result["id"]
 
     assert record_id
     assert result["success"] == True

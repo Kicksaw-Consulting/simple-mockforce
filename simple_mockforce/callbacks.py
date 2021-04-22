@@ -55,7 +55,7 @@ def create_callback(request):
         200,
         {},
         # yep, salesforce lowercases id on create's response
-        json.dumps({"Id": id_, "success": True, "errors": []}),
+        json.dumps({"id": id_, "success": True, "errors": []}),
     )
 
 
