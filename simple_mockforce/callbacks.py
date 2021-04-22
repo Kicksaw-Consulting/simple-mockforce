@@ -153,12 +153,23 @@ def bulk_result_callback(request):
 
     job = virtual_salesforce.jobs[job_id]
     sobject_name = job["object"]
+    operation = job["operation"]
     data = virtual_salesforce.batch_data[batch_id]
 
-    created_ids = list()
+    sfdc_ids = list()
     for sobject in data:
-        id_ = virtual_salesforce.create(sobject_name, sobject)
-        created_ids.append(id_)
+        if operation == "upsert":
+            external_field_id = job["externalIdFieldName"]
+            id_ = virtual_salesforce.upsert(
+                sobject_name,
+                sobject[external_field_id],
+                sobject,
+                external_field_id,
+            )
+            sfdc_ids.append(id_)
+        elif operation == "insert":
+            id_ = virtual_salesforce.create(sobject_name, sobject)
+            sfdc_ids.append(id_)
 
     fake_response = [
         {
@@ -167,7 +178,7 @@ def bulk_result_callback(request):
             "id": id_,
             "errors": [],
         }
-        for id_ in created_ids
+        for id_ in sfdc_ids
     ]
 
     return (

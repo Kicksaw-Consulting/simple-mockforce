@@ -62,8 +62,6 @@ class VirtualSalesforce:
     def get_by_custom_id(self, sobject_name: str, record_id: str, custom_id_field: str):
         sobject_name = sobject_name.lower()
         custom_id_field = custom_id_field.lower()
-        print(self.data)
-        print(custom_id_field, record_id)
         for sobject in self.data[sobject_name]:
             if sobject.get(custom_id_field) == record_id:
                 return sobject
@@ -83,16 +81,19 @@ class VirtualSalesforce:
             **data,
         }
 
-    def upsert(self, sobject_name: str, record_id: str, sobject: dict, upsert_key):
+    def upsert(self, sobject_name: str, record_id: str, sobject: dict, upsert_key: str):
         sobject_name = sobject_name.lower()
         sobject = self._normalize_data(sobject)
+        upsert_key = upsert_key.lower()
         _, index = find_object_and_index(
             self.data[sobject_name],
             upsert_key,
             record_id,
         )
         if not index:
-            self.create(sobject_name, sobject)
+            return self.create(sobject_name, sobject)
+        else:
+            return self.data[sobject_name][0]["id"]
 
     def create(self, sobject_name: str, sobject: dict):
         sobject = self._normalize_data(sobject)
@@ -121,7 +122,7 @@ class VirtualSalesforce:
         self.jobs[job_id] = job
         return job
 
-    def create_batch(self, job_id, data, operation):
+    def create_batch(self, job_id: str, data: dict, operation: str):
         batch_id = self._generate_sfdc_id()
         batch = {
             "id": batch_id,
