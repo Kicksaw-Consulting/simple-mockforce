@@ -10,14 +10,8 @@ def test_get_object_mock():
 
     result = salesforce.Contact.get("123")
 
-    assert dict(result) == {
-        "id": "123",
-        "name": "Bob",
-        "attributes": {
-            "type": "Contact",
-            "url": "/services/data/v42.0/sobjects/Contact/123",
-        },
-    }
+    assert result["id"] == "123"
+    assert result["name"] == "Bob"
 
 
 @mock_salesforce
@@ -45,7 +39,8 @@ def test_upsert_object_mock():
     salesforce = Salesforce(**MOCK_CREDS)
 
     result = salesforce.Contact.upsert(
-        "customExtIdField__c/imacustomid123", {"Name": "George"}
+        "customExtIdField__c/imacustomid123",
+        {"Name": "George", "customExtIdField__c": "imacustomid123"},
     )
 
     assert result == 204
@@ -60,7 +55,7 @@ def test_get_by_custom_id_mock():
     )
 
     assert result["id"]
-    assert result["customExtIdField__c"] == "imacustomid123"
+    assert result["customextidfield__c"] == "imacustomid123"
     assert result["name"] == "George"
 
 

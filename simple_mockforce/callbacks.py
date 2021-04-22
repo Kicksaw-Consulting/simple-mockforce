@@ -28,14 +28,17 @@ def get_callback(request):
     path = urlparse(url).path
     sobject, custom_id_field, record_id = parse_detail_url(path)
 
-    object_ = virtual_salesforce.get(
-        sobject, record_id, custom_id_field=custom_id_field
-    )
+    if not custom_id_field:
+        sobject = virtual_salesforce.get(sobject, record_id)
+    else:
+        sobject = virtual_salesforce.get_by_custom_id(
+            sobject, record_id, custom_id_field
+        )
 
     return (
         200,
         {},
-        json.dumps({"attributes": {"type": sobject, "url": path}, **object_}),
+        json.dumps({"attributes": {"type": sobject, "url": path}, **sobject}),
     )
 
 

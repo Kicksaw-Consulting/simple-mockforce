@@ -51,11 +51,23 @@ class VirtualSalesforce:
 
     # CRUD
 
-    def get(self, sobject_name: str, record_id: str, custom_id_field: str = None):
+    def get(self, sobject_name: str, record_id: str):
         sobject_name = sobject_name.lower()
         for sobject in self.data[sobject_name]:
-            if sobject.get(self._get_pk_name(custom_id_field)) == record_id:
+            if sobject["id"] == record_id:
                 return sobject
+        # TODO: somehow mock the error we'd get from Salesforce instead?
+        raise AssertionError(f"Could not find {record_id} in {sobject_name}s")
+
+    def get_by_custom_id(self, sobject_name: str, record_id: str, custom_id_field: str):
+        sobject_name = sobject_name.lower()
+        custom_id_field = custom_id_field.lower()
+        print(self.data)
+        print(custom_id_field, record_id)
+        for sobject in self.data[sobject_name]:
+            if sobject.get(custom_id_field) == record_id:
+                return sobject
+        # TODO: ditto
         raise AssertionError(f"Could not find {record_id} in {sobject_name}s")
 
     def update(self, sobject_name: str, record_id: str, data: dict):
