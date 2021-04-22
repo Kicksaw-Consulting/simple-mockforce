@@ -41,7 +41,7 @@ class VirtualSalesforce:
         objects = self.get_sobjects(sobject)
         # TODO: construct attributes
         records = [
-            *map(lambda record: {field: record[field] for field in fields}, objects)
+            *map(lambda record: {field: record.get(field) for field in fields}, objects)
         ]
         if limit:
             limit: int = limit[0]

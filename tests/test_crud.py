@@ -1,31 +1,7 @@
-import json
-
 from simple_mockforce import mock_salesforce
 from simple_salesforce import Salesforce
 
-
-MOCK_CREDS = {
-    "username": "hi",
-    "password": "hello",
-    "security_token": "123",
-    "domain": "mock",
-}
-
-
-def to_dict(input_ordered_dict):
-    """
-    Useful for getting rid of OrderedDicts
-    """
-    return json.loads(json.dumps(input_ordered_dict))
-
-
-@mock_salesforce
-def test_query_mock():
-    salesforce = Salesforce(**MOCK_CREDS)
-
-    results = salesforce.query("SELECT Id, Name FROM Contact LIMIT 1")
-    records = results["records"]
-    assert len(records) == 1
+from tests.utils import MOCK_CREDS
 
 
 @mock_salesforce
@@ -95,25 +71,3 @@ def test_delete_object_mock():
     result = salesforce.Contact.delete("123")
 
     assert result == 204
-
-
-@mock_salesforce
-def test_bulk_insert():
-    salesforce = Salesforce(**MOCK_CREDS)
-
-    result = salesforce.bulk.Contact.insert([{"Name": "Test"}])
-
-    assert len(result) == 1
-    assert result[0]["success"]
-
-
-@mock_salesforce
-def test_bulk_upsert():
-    salesforce = Salesforce(**MOCK_CREDS)
-
-    result = salesforce.bulk.Contact.upsert(
-        [{"Name": "Test", "customExtIdField__c": "9999"}], "customExtIdField__c"
-    )
-
-    assert len(result) == 1
-    assert result[0]["success"]
