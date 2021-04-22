@@ -26,19 +26,19 @@ def query_callback(request):
 def get_callback(request):
     url = request.url
     path = urlparse(url).path
-    sobject, custom_id_field, record_id = parse_detail_url(path)
+    sobject_name, custom_id_field, record_id = parse_detail_url(path)
 
     if not custom_id_field:
-        sobject = virtual_salesforce.get(sobject, record_id)
+        sobject = virtual_salesforce.get(sobject_name, record_id)
     else:
         sobject = virtual_salesforce.get_by_custom_id(
-            sobject, record_id, custom_id_field
+            sobject_name, record_id, custom_id_field
         )
 
     return (
         200,
         {},
-        json.dumps({"attributes": {"type": sobject, "url": path}, **sobject}),
+        json.dumps({"attributes": {"type": sobject_name, "url": path}, **sobject}),
     )
 
 
@@ -95,9 +95,6 @@ def delete_callback(request):
 def job_callback(request):
     body = json.loads(request.body)
 
-    print(request.url, request.method)
-    print("first")
-
     job = virtual_salesforce.create_job(body)
 
     return (
@@ -116,9 +113,6 @@ def bulk_callback(request):
     job = virtual_salesforce.jobs[job_id]
     operation = job["operation"]
 
-    print(request.url)
-    print("second")
-
     batch = virtual_salesforce.create_batch(job_id, body, operation)
 
     return (
@@ -133,9 +127,6 @@ def bulk_detail_callback(request):
     path = urlparse(url).path
 
     job_id, batch_id = parse_batch_detail_url(path)
-
-    print(request.url)
-    print("third")
 
     fake_response = {
         "Id": batch_id,
@@ -155,9 +146,6 @@ def bulk_result_callback(request):
     path = urlparse(url).path
 
     job_id, batch_id = parse_batch_result_url(path)
-
-    print(request.url)
-    print("fourth")
 
     job = virtual_salesforce.jobs[job_id]
     sobject_name = job["object"]
@@ -208,8 +196,6 @@ def job_detail_callback(request):
     """
     This is a no-op as far as we're concerned
     """
-    print(request.url)
-    print("fifth")
     return (
         201,
         {},
