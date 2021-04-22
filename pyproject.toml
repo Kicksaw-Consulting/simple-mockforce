@@ -1,8 +1,15 @@
 [tool.poetry]
 name = "simple-mockforce"
 version = "0.1.0"
-description = ""
+description = "A companion package for simple-salesforce to enable easier testing of code that interacts with Salesforce's API"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/Kicksaw-Consulting/simple-mockforce"
 authors = ["Alex Drozd <drozdster@gmail.com>"]
+keywords = ["python", "simple-salesforce", "salesforce", "testing", "mocking"]
+packages = [
+    { include = "simple_mockforce" }
+]
 
 [tool.poetry.dependencies]
 python = "^3.8"
