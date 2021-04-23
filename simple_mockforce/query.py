@@ -1,6 +1,6 @@
 from typing import List, Tuple, Union
 
-from python_soql_parser.binops import EQ
+from python_soql_parser.binops import EQ, NEQ
 from python_soql_parser.core import AND, OR, IN
 
 
@@ -56,10 +56,13 @@ def evaluate_boolean_expression(previous: list, current_bool: bool):
 def evaluate_condition(
     sobject: dict, field: str, binop: str, value: Union[str, List[str]]
 ):
+    field_value = sobject[field]
     if binop == EQ:
-        return sobject[field] == value
+        return field_value == value
     elif binop == IN:
-        return sobject[field] in value
+        return field_value in value
+    elif binop == NEQ:
+        return field_value != value
     else:
         raise AssertionError(f"{binop} not yet handled")
 

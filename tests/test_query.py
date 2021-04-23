@@ -28,7 +28,7 @@ def test_where_query():
         # f"SELECT Id, Name FROM Lead WHERE Id = 'hi' AND Id = null"
         # f"SELECT Id, Name FROM Lead WHERE Name = 'Jim Bean'"
         # f"SELECT Id, Name FROM Lead WHERE Name = 'Jim Bean' OR Name = 'Jim Bean'"
-        f"SELECT Id, Name FROM Lead WHERE Name IN ('Jim Bean') AND Name = 'Hi'"
+        f"SELECT Id, Name FROM Lead WHERE Name != 'Jim Bean'"
     )
     print("records", results["records"])
     # records = results["records"]
