@@ -1,7 +1,7 @@
 from typing import List, Tuple
 
 from python_soql_parser.binops import EQ
-from python_soql_parser.core import AND
+from python_soql_parser.core import AND, OR
 
 
 def filter_by_where_clause(sobject: dict, where: list) -> bool:
@@ -30,7 +30,6 @@ def _dive_into_clause(
             field, binop, value = parse_clause(clause)
             passes = evaluate_condition(sobject, field, binop, value)
             if previous:
-                print(previous)
                 passes = evaluate_boolean_expression(previous, passes)
             results.append(passes)
         else:
@@ -43,9 +42,14 @@ def evaluate_boolean_expression(previous: list, current_bool: bool):
     previous_result, boolean_operator = previous_condition
     if boolean_operator == AND:
         passes = current_bool and previous_result
-        previous.clear()
+    elif boolean_operator == OR:
+        passes = current_bool or previous_result
     else:
         raise AssertionError(f"{previous_condition[1]} is not yet handled")
+    # previous is a pass by reference hack to allow us to keep track of
+    # whether or not we need to account for a boolean in the where condition
+    # Clear the data stored in the reference once it's been accounted for
+    previous.clear()
     return passes
 
 
