@@ -139,8 +139,16 @@ def test_where_complex_query():
     record = records[2]
     assert record["Id"] == adams_id
 
-    # results = salesforce.query(
-    #     f"SELECT Id, Name FROM SomeFamousPerson__c WHERE (Title = 'Actor' OR Title = 'Director') AND Name = null"
-    # )
-    # records = results["records"]
-    # assert len(records) == 0
+    results = salesforce.query(
+        f"SELECT Id, Name FROM SomeFamousPerson__c WHERE (Title = 'Actor' OR Title = 'Director') AND Name = null"
+    )
+    records = results["records"]
+    assert len(records) == 0
+
+    results = salesforce.query(
+        f"SELECT Id, Name FROM SomeFamousPerson__c WHERE (Title = 'Actor' OR Title = 'Director') AND (Name != null AND Name = 'Quentin Tarantino')"
+    )
+    records = results["records"]
+    assert len(records) == 1
+    record = records[0]
+    assert record["Id"] == tarantino_id

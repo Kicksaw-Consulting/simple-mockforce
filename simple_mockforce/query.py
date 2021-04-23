@@ -23,7 +23,7 @@ def _dive_into_clause(
     for clause in where:
         is_list = type(clause) == list and len(clause) == 3
         if is_list and _needs_another_dive(clause):
-            return _dive_into_clause(sobject, clause, results, previous)
+            _dive_into_clause(sobject, clause, results, previous)
         elif is_list:
             field, binop, value = parse_clause(clause)
             passes = evaluate_condition(sobject, field, binop, value)
