@@ -1,23 +1,29 @@
 from simple_mockforce import mock_salesforce
 from simple_salesforce import Salesforce
 
+from simple_mockforce.virtual import virtual_salesforce
 from tests.utils import MOCK_CREDS
 
 
 @mock_salesforce
 def test_basic_query():
-    """
-    WARNING: this test is polluted
-    """
+    virtual_salesforce.create_new_virtual_instance()
     salesforce = Salesforce(**MOCK_CREDS)
+
+    salesforce.Contact.create({"Name": "Ozzy Osbourne"})
 
     results = salesforce.query("SELECT Id, Name FROM Contact LIMIT 1")
     records = results["records"]
+
     assert len(records) == 1
+    record = records[0]
+    assert record["Id"]
+    assert record["Name"] == "Ozzy Osbourne"
 
 
 @mock_salesforce
 def test_where_query():
+    virtual_salesforce.create_new_virtual_instance()
     salesforce = Salesforce(**MOCK_CREDS)
 
     response = salesforce.Lead.create(
@@ -34,7 +40,6 @@ def test_where_query():
     records = results["records"]
     assert len(records) == 1
     record = records[0]
-    print(record)
     assert record["Id"] == sfdc_id
     assert record["Name"] == "Jim Bean"
 

@@ -14,7 +14,7 @@ def filter_by_where_clause(sobject: dict, where: list) -> bool:
         _dive_into_clause(sobject, where, results)
         passes = not any(not x for x in results)
         return passes
-    return False
+    return True
 
 
 def _dive_into_clause(

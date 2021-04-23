@@ -62,7 +62,6 @@ class VirtualSalesforce:
         records = list()
 
         for sobject in sobjects:
-            sobject = {key.lower(): value for key, value in sobject.items()}
             passes = filter_by_where_clause(sobject, where)
             if not passes:
                 continue
