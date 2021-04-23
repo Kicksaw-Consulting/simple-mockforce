@@ -20,7 +20,9 @@ def test_basic_query():
 def test_where_query():
     salesforce = Salesforce(**MOCK_CREDS)
 
-    response = salesforce.Lead.create({"Name": "Jim Bean"})
+    response = salesforce.Lead.create(
+        {"Name": "Jim Bean", "Title": "hey", "Human_Score__c": 5}
+    )
     # response = salesforce.Lead.create({"Name": "Corey Taylor"})
     sfdc_id = response["id"]
 
@@ -28,7 +30,8 @@ def test_where_query():
         # f"SELECT Id, Name FROM Lead WHERE Id = 'hi' AND Id = null"
         # f"SELECT Id, Name FROM Lead WHERE Name = 'Jim Bean'"
         # f"SELECT Id, Name FROM Lead WHERE Name = 'Jim Bean' OR Name = 'Jim Bean'"
-        f"SELECT Id, Name FROM Lead WHERE Name != 'Jim Bean'"
+        # f"SELECT Id, Name FROM Lead WHERE Title != null"
+        f"SELECT Id, Name FROM Lead WHERE Human_Score__c >= 4"
     )
     print("records", results["records"])
     # records = results["records"]

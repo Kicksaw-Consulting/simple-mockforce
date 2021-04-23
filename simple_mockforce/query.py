@@ -1,7 +1,7 @@
 from typing import List, Tuple, Union
 
-from python_soql_parser.binops import EQ, NEQ
-from python_soql_parser.core import AND, OR, IN
+from python_soql_parser.binops import EQ, NEQ, LT, LTE, GT, GTE
+from python_soql_parser.core import AND, OR, IN, NULL
 
 
 def filter_by_where_clause(sobject: dict, where: list) -> bool:
@@ -42,8 +42,6 @@ def evaluate_boolean_expression(previous: list, current_bool: bool):
         passes = current_bool and previous_result
     elif boolean_operator == OR:
         passes = current_bool or previous_result
-    # elif boolean_operator == IN:
-    #     passes =
     else:
         raise AssertionError(f"{previous_condition[1]} is not yet handled")
     # previous is a pass by reference hack to allow us to keep track of
@@ -63,12 +61,19 @@ def evaluate_condition(
         return field_value in value
     elif binop == NEQ:
         return field_value != value
+    elif binop == LT:
+        return field_value < value
+    elif binop == LTE:
+        return field_value <= value
+    elif binop == GT:
+        return field_value > value
+    elif binop == GTE:
+        return field_value >= value
     else:
         raise AssertionError(f"{binop} not yet handled")
 
 
 def _needs_another_dive(clause: list):
-    # return any(not isinstance(x, str) for x in clause)
     return type(clause[0]) != str
 
 
@@ -79,7 +84,19 @@ def parse_clause(clause: list) -> Union[str, List[str]]:
     if type(dirty_value) == list:
         if dirty_value[0] == "(" and dirty_value[-1] == ")":
             values = dirty_value[1:-1]
-            value = [value.strip("'") for value in values]
+            value = [clean_string(dirty_value) for value in values]
     else:
-        value = dirty_value.strip("'")
-    return field, binop, value
+        value = clean_string(dirty_value)
+    return field, binop, coerce_to_none_if_applicable(value)
+
+
+def clean_string(value):
+    if type(value) == str:
+        return value.strip("'")
+    return value
+
+
+def coerce_to_none_if_applicable(value: Union[str, list]):
+    if type(value) == list:
+        return [x if x != NULL else None for x in value]
+    return value if value != NULL else None
