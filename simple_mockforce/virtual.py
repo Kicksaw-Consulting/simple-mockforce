@@ -38,7 +38,7 @@ class VirtualSalesforce:
 
     def query(self, soql: str):
         logger.warning(
-            "simple-mockforce: Mocking 'query' is not yet fully supported. You should watch your tests closely if you're using this feature."
+            "Mocking 'query' is not yet fully supported. You should watch your tests closely if you're using this feature."
         )
         parse_results = parse(soql)
         parsed_sobject = parse_results["sobject"]
