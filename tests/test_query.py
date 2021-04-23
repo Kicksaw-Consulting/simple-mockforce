@@ -27,7 +27,7 @@ def test_where_query():
     results = salesforce.query(
         # f"SELECT Id, Name FROM Lead WHERE Id = 'hi' AND Id = null"
         # f"SELECT Id, Name FROM Lead WHERE Name = 'Jim Bean'"
-        f"SELECT Id, Name FROM Lead WHERE Name = 'Jim Bean' AND Name = 'Jim'"
+        f"SELECT Id, Name FROM Lead WHERE Name = 'Jim Bean' AND Name = 'Jim Bean'"
     )
     print("records", results["records"])
     # records = results["records"]

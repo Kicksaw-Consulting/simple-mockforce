@@ -1,6 +1,7 @@
 from typing import List
 
 from python_soql_parser.binops import EQ
+from python_soql_parser.core import AND
 
 
 def filter_by_where_clause(sobject: dict, where: list) -> bool:
@@ -18,21 +19,28 @@ def filter_by_where_clause(sobject: dict, where: list) -> bool:
     return False
 
 
-def _dive_into_clause(sobject: dict, where: list, results: List[bool]):
+def _dive_into_clause(
+    sobject: dict, where: list, results: List[bool], previous: list = []
+):
     for clause in where:
         is_list = type(clause) == list and len(clause) == 3
         if is_list and _is_not_clause(clause):
-            return _dive_into_clause(sobject, clause, results)
+            return _dive_into_clause(sobject, clause, results, previous)
         elif is_list:
             print(clause)
             field, binop, value = parse_clause(clause)
             passes = evaluate_condition(sobject, field, binop, value)
             print(passes)
+            if previous:
+                previous_condition = previous[0]
+                if previous_condition[1] == AND:
+                    passes = passes and previous_condition[0]
+                    previous.clear()
             results.append(passes)
-            # return passes
         else:
-            pass
-            # print(clause)
+            previous_evaluation = results.pop()
+            print("previous_evaluation", previous_evaluation)
+            previous.append((previous_evaluation, clause))
 
 
 def parse_clause(clause: list):
