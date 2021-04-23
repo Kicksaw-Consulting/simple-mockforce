@@ -29,7 +29,7 @@ def test_where_query():
         # f"SELECT Id, Name FROM Lead WHERE Name = 'Jim Bean'"
         f"SELECT Id, Name FROM Lead WHERE Name = 'Jim Bean' AND Name = 'Jim'"
     )
-    print(results)
+    print("records", results["records"])
     # records = results["records"]
     # assert len(records) == 0
 
