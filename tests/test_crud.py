@@ -1,5 +1,6 @@
 from simple_mockforce import mock_salesforce
 from simple_salesforce import Salesforce
+from simple_salesforce.exceptions import SalesforceResourceNotFound
 
 from tests.utils import MOCK_CREDS
 
@@ -39,7 +40,7 @@ def test_crud_lifecycle():
     failed = False
     try:
         result = salesforce.Contact.get(record_id)
-    except AssertionError:
+    except SalesforceResourceNotFound:
         failed = True
 
     assert failed
@@ -75,6 +76,18 @@ def test_crud_lifecycle_with_custom_id():
     assert result["Id"]
     assert result[custom_id_field] == custom_id
     assert result["LastName"] == "Smith"
+
+    result = salesforce.Contact.delete(result["Id"])
+
+    assert result == 204
+
+    failed = False
+    try:
+        salesforce.Contact.get_by_custom_id(custom_id_field, custom_id)
+    except SalesforceResourceNotFound:
+        failed = True
+
+    assert failed
 
 
 @mock_salesforce
@@ -121,3 +134,32 @@ def test_crud_lifecycle_with_custom_id_and_foreign_key():
     assert result["FirstName"] == "Pierre"
     assert result["LastName"] == "Pants"
     assert result["CustomAccount__c"] == "xyz"
+
+
+@mock_salesforce
+def test_crud_error_handling():
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    failed = False
+    try:
+        salesforce.I_Dont_Exist__c.get("512")
+    except SalesforceResourceNotFound:
+        failed = True
+
+    assert failed
+
+    failed = False
+    try:
+        salesforce.Contact.update("512", {"Name": "idk"})
+    except SalesforceResourceNotFound:
+        failed = True
+
+    assert failed
+
+    failed = False
+    try:
+        salesforce.Contact.delete("512")
+    except SalesforceResourceNotFound:
+        failed = True
+
+    assert failed

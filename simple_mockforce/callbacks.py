@@ -2,6 +2,7 @@ import json
 
 from urllib.parse import urlparse
 
+from simple_mockforce.error_codes import NOT_FOUND
 from simple_mockforce.utils import (
     parse_batch_detail_url,
     parse_batch_result_url,
@@ -28,11 +29,18 @@ def get_callback(request):
     path = urlparse(url).path
     sobject_name, custom_id_field, record_id = parse_detail_url(path)
 
-    if not custom_id_field:
-        sobject = virtual_salesforce.get(sobject_name, record_id)
-    else:
-        sobject = virtual_salesforce.get_by_custom_id(
-            sobject_name, record_id, custom_id_field
+    try:
+        if not custom_id_field:
+            sobject = virtual_salesforce.get(sobject_name, record_id)
+        else:
+            sobject = virtual_salesforce.get_by_custom_id(
+                sobject_name, record_id, custom_id_field
+            )
+    except (AssertionError, KeyError):
+        return (
+            404,
+            {},
+            json.dumps([{"errorCode": NOT_FOUND}]),
         )
 
     return (
@@ -67,7 +75,14 @@ def update_callback(request):
     sobject, upsert_key, record_id = parse_detail_url(path)
 
     if not upsert_key:
-        virtual_salesforce.update(sobject, record_id, body)
+        try:
+            virtual_salesforce.update(sobject, record_id, body)
+        except AssertionError:
+            return (
+                404,
+                {},
+                json.dumps([{"errorCode": NOT_FOUND}]),
+            )
     else:
         virtual_salesforce.upsert(sobject, record_id, body, upsert_key=upsert_key)
 
@@ -83,7 +98,15 @@ def delete_callback(request):
     path = urlparse(url).path
 
     sobject, _, record_id = parse_detail_url(path)
-    virtual_salesforce.delete(sobject, record_id)
+
+    try:
+        virtual_salesforce.delete(sobject, record_id)
+    except AssertionError:
+        return (
+            404,
+            {},
+            json.dumps([{"errorCode": NOT_FOUND}]),
+        )
 
     return (
         204,

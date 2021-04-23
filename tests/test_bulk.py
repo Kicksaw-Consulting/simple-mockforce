@@ -1,6 +1,7 @@
-from simple_mockforce import mock_salesforce
 from simple_salesforce import Salesforce
+from simple_salesforce.exceptions import SalesforceResourceNotFound
 
+from simple_mockforce import mock_salesforce
 from tests.utils import MOCK_CREDS, to_dict
 
 
@@ -38,7 +39,7 @@ def test_bulk_lifecycle_upsert_key():
     failed = False
     try:
         salesforce.Account.get_by_custom_id(custom_id_field, custom_id)
-    except AssertionError:
+    except SalesforceResourceNotFound:
         failed = True
 
     assert failed

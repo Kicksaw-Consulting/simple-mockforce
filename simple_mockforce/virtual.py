@@ -3,6 +3,9 @@ import random
 import string
 
 from python_soql_parser import parse
+
+from simple_salesforce.exceptions import SalesforceResourceNotFound
+
 from simple_mockforce.query import (
     filter_by_where_clause,
 )
@@ -81,14 +84,12 @@ class VirtualSalesforce:
         for sobject in self.data[sobject_name]:
             if sobject["Id"] == record_id:
                 return sobject
-        # TODO: somehow mock the error we'd get from Salesforce instead?
         raise AssertionError(f"Could not find {record_id} in {sobject_name}s")
 
     def get_by_custom_id(self, sobject_name: str, record_id: str, custom_id_field: str):
         for sobject in self.data[sobject_name]:
             if sobject.get(custom_id_field) == record_id:
                 return sobject
-        # TODO: ditto
         raise AssertionError(f"Could not find {record_id} in {sobject_name}s")
 
     def update(self, sobject_name: str, record_id: str, data: dict):
@@ -97,6 +98,7 @@ class VirtualSalesforce:
             "Id",
             record_id,
         )
+        assert index is not None, f"Could not find {record_id} in {sobject_name}s"
         sobject = self._normalize_relation_via_external_id_field(data)
         self.data[sobject_name][index] = {
             **original,
@@ -132,6 +134,8 @@ class VirtualSalesforce:
         for idx, object_ in enumerate(self.data[sobject_name]):
             if object_["Id"] == record_id:
                 index = idx
+
+        assert index is not None, f"Could not found {record_id} in {sobject_name}s"
 
         self.data[sobject_name].pop(index)
 
