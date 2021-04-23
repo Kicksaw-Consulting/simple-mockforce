@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 from python_soql_parser.binops import EQ
 from python_soql_parser.core import AND
@@ -27,27 +27,26 @@ def _dive_into_clause(
         if is_list and _is_not_clause(clause):
             return _dive_into_clause(sobject, clause, results, previous)
         elif is_list:
-            print(clause)
             field, binop, value = parse_clause(clause)
             passes = evaluate_condition(sobject, field, binop, value)
-            print(passes)
             if previous:
-                previous_condition = previous[0]
-                if previous_condition[1] == AND:
-                    passes = passes and previous_condition[0]
-                    previous.clear()
+                print(previous)
+                passes = evaluate_boolean_expression(previous, passes)
             results.append(passes)
         else:
             previous_evaluation = results.pop()
-            print("previous_evaluation", previous_evaluation)
             previous.append((previous_evaluation, clause))
 
 
-def parse_clause(clause: list):
-    field = clause[0]
-    binop = clause[1]
-    value = clause[2].strip("'")
-    return field, binop, value
+def evaluate_boolean_expression(previous: list, current_bool: bool):
+    previous_condition: Tuple[bool, str] = previous[0]
+    previous_result, boolean_operator = previous_condition
+    if boolean_operator == AND:
+        passes = current_bool and previous_result
+        previous.clear()
+    else:
+        raise AssertionError(f"{previous_condition[1]} is not yet handled")
+    return passes
 
 
 def evaluate_condition(sobject: dict, field: str, binop: str, value: str):
@@ -59,3 +58,10 @@ def evaluate_condition(sobject: dict, field: str, binop: str, value: str):
 
 def _is_not_clause(clause: list):
     return any(not isinstance(x, str) for x in clause)
+
+
+def parse_clause(clause: list):
+    field = clause[0]
+    binop = clause[1]
+    value = clause[2].strip("'")
+    return field, binop, value
