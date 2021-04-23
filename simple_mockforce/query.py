@@ -54,6 +54,8 @@ def evaluate_boolean_expression(previous: list, current_bool: bool):
 def evaluate_condition(
     sobject: dict, field: str, binop: str, value: Union[str, List[str]]
 ):
+    if field not in sobject:
+        return False
     field_value = sobject[field]
     if binop == EQ:
         return field_value == value
