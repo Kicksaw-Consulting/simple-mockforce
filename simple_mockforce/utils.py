@@ -59,28 +59,3 @@ def terminate_regex(url_pattern):
     Simple terminates the given pattern (which is supplied from constants.py)
     """
     return re.compile(url_pattern + "$")
-
-
-def filter_by_where_clause(sobject: dict, where: list) -> bool:
-    """
-    Return False if the object passes the where clause
-    Return True if it should be excluded
-    """
-    equals = list()
-
-    if where:
-        for clause in where:
-            field = clause[0]
-            op = clause[1]
-            value = clause[2].strip("'")
-            if op == "=":
-                equals.append((field, value))
-    else:
-        return False
-
-    skip = False
-    for condition in equals:
-        if sobject[condition[0]] != condition[1]:
-            skip = True
-
-    return skip
