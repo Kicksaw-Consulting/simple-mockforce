@@ -34,6 +34,10 @@ def test_where_basic_query():
     records = results["records"]
     assert len(records) == 0
 
+    results = salesforce.query(f"SELECT Id, Name FROM Lead WHERE Name = null")
+    records = results["records"]
+    assert len(records) == 0
+
     results = salesforce.query(
         f"SELECT Id, Name, Title FROM Lead WHERE Id = '{sfdc_id}'"
     )
