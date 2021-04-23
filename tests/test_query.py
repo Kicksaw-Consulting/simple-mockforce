@@ -34,14 +34,15 @@ def test_where_query():
     records = results["records"]
     assert len(records) == 1
     record = records[0]
-    assert record["id"] == sfdc_id
-    assert record["name"] == "Jim Bean"
+    print(record)
+    assert record["Id"] == sfdc_id
+    assert record["Name"] == "Jim Bean"
 
     results = salesforce.query(f"SELECT Id, Name FROM Lead WHERE Human_Score__c = 5")
     records = results["records"]
     assert len(records) == 1
     record = records[0]
-    assert record["id"] == sfdc_id
+    assert record["Id"] == sfdc_id
 
     results = salesforce.query(
         f"SELECT Id, Name FROM Lead WHERE Human_Score__c < 4 OR Name = 'Jim Bean'"
@@ -49,7 +50,7 @@ def test_where_query():
     records = results["records"]
     assert len(records) == 1
     record = records[0]
-    assert record["id"] == sfdc_id
+    assert record["Id"] == sfdc_id
 
     results = salesforce.query(
         f"SELECT Id, Name FROM Lead WHERE (Human_Score__c < 4 OR Name = 'Jim Bean') AND Title = 'CDO'"
@@ -57,7 +58,7 @@ def test_where_query():
     records = results["records"]
     assert len(records) == 1
     record = records[0]
-    assert record["id"] == sfdc_id
+    assert record["Id"] == sfdc_id
 
     results = salesforce.query(f"SELECT Id, Name FROM Lead WHERE Human_Score__c >= 6")
     records = results["records"]
