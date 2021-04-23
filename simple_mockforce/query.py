@@ -25,17 +25,17 @@ def _dive_into_clause(
         if is_list and _needs_another_dive(clause):
             _dive_into_clause(sobject, clause, results, previous)
         elif is_list:
-            field, binop, value = parse_clause(clause)
-            passes = evaluate_condition(sobject, field, binop, value)
+            field, binop, value = _parse_clause(clause)
+            passes = _evaluate_condition(sobject, field, binop, value)
             if previous:
-                passes = evaluate_boolean_expression(previous, passes)
+                passes = _evaluate_boolean_expression(previous, passes)
             results.append(passes)
         else:
             previous_evaluation = results.pop()
             previous.append((previous_evaluation, clause))
 
 
-def evaluate_boolean_expression(previous: list, current_bool: bool):
+def _evaluate_boolean_expression(previous: list, current_bool: bool):
     previous_condition: Tuple[bool, str] = previous[0]
     previous_result, boolean_operator = previous_condition
     if boolean_operator == AND:
@@ -51,7 +51,7 @@ def evaluate_boolean_expression(previous: list, current_bool: bool):
     return passes
 
 
-def evaluate_condition(
+def _evaluate_condition(
     sobject: dict, field: str, binop: str, value: Union[str, List[str]]
 ):
     if field not in sobject:
@@ -79,26 +79,26 @@ def _needs_another_dive(clause: list):
     return type(clause[0]) != str
 
 
-def parse_clause(clause: list) -> Union[str, List[str]]:
+def _parse_clause(clause: list) -> Union[str, List[str]]:
     field = clause[0]
     binop = clause[1]
     dirty_value = clause[2]
     if type(dirty_value) == list:
         if dirty_value[0] == "(" and dirty_value[-1] == ")":
             values = dirty_value[1:-1]
-            value = [clean_string(dirty_value) for value in values]
+            value = [_clean_string(dirty_value) for value in values]
     else:
-        value = clean_string(dirty_value)
-    return field, binop, coerce_to_none_if_applicable(value)
+        value = _clean_string(dirty_value)
+    return field, binop, _coerce_to_none_if_applicable(value)
 
 
-def clean_string(value):
+def _clean_string(value):
     if type(value) == str:
         return value.strip("'")
     return value
 
 
-def coerce_to_none_if_applicable(value: Union[str, list]):
+def _coerce_to_none_if_applicable(value: Union[str, list]):
     if type(value) == list:
         return [x if x != NULL else None for x in value]
     return value if value != NULL else None
