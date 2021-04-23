@@ -1,14 +1,14 @@
 # foundations
 SF_VERSION = "[0-9]*[.]0"
 BASE_URL = "https?://([a-z0-9]+[.])*salesforce[.]com"
+SOBJECT = "[a-zA-Z0-9_]+"
 SFDC_ID = "[a-zA-Z0-9]+"
 
 
 # CRUD and query stuff
 QUERY_URL = f"{BASE_URL}/services/data/v{SF_VERSION}/query/"
-DETAIL_URL = f"{BASE_URL}/services/data/v{SF_VERSION}/sobjects/{SFDC_ID}/{SFDC_ID}"
-CREATE_URL = f"{BASE_URL}/services/data/v{SF_VERSION}/sobjects/{SFDC_ID}/"
-DESCRIBE_URL = f"{BASE_URL}/services/data/v{SF_VERSION}/sobjects/Contact/describe"
+DETAIL_URL = f"{BASE_URL}/services/data/v{SF_VERSION}/sobjects/{SOBJECT}/{SFDC_ID}"
+CREATE_URL = f"{BASE_URL}/services/data/v{SF_VERSION}/sobjects/{SOBJECT}/"
 
 
 # bulk stuff

@@ -3,10 +3,14 @@ import random
 import string
 
 from python_soql_parser import parse
-from simple_mockforce.utils import (
+from simple_mockforce.query import (
     filter_by_where_clause,
-    find_object_and_index,
 )
+from simple_mockforce.utils import find_object_and_index
+
+from logging import getLogger
+
+logger = getLogger(__name__)
 
 
 class VirtualSalesforce:
@@ -33,6 +37,9 @@ class VirtualSalesforce:
     # SOQL
 
     def query(self, soql: str):
+        logger.warning(
+            "Mocking 'query' is not yet fully supported. You should watch your tests closely if you're using this feature."
+        )
         parse_results = parse(soql)
         parsed_sobject = parse_results["sobject"]
 
@@ -55,9 +62,8 @@ class VirtualSalesforce:
         records = list()
 
         for sobject in sobjects:
-            sobject = {key.lower(): value for key, value in sobject.items()}
-            skip = filter_by_where_clause(sobject, where)
-            if skip:
+            passes = filter_by_where_clause(sobject, where)
+            if not passes:
                 continue
 
             record = {field: sobject.get(field) for field in fields}
