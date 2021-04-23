@@ -97,12 +97,14 @@ class VirtualSalesforce:
             "Id",
             record_id,
         )
+        sobject = self._normalize_relation_via_external_id_field(data)
         self.data[sobject_name][index] = {
             **original,
-            **data,
+            **sobject,
         }
 
     def upsert(self, sobject_name: str, record_id: str, sobject: dict, upsert_key: str):
+        self._provision_sobject(sobject_name)
         _, index = find_object_and_index(
             self.data[sobject_name],
             upsert_key,
@@ -119,6 +121,8 @@ class VirtualSalesforce:
     def create(self, sobject_name: str, sobject: dict):
         id_ = self._generate_sfdc_id()
         sobject["Id"] = id_
+        sobject = self._normalize_relation_via_external_id_field(sobject)
+
         self._provision_sobject(sobject_name)
         self.data[sobject_name].append(sobject)
         return id_
@@ -172,10 +176,16 @@ class VirtualSalesforce:
         return "".join(random.choices(string.ascii_letters + string.digits, k=18))
 
     @staticmethod
-    def _get_pk_name(external_id_field: str = None):
-        if external_id_field:
-            return external_id_field
-        return "Id"
+    def _normalize_relation_via_external_id_field(sobject: dict):
+        normalized = dict()
+        for key, value in sobject.items():
+            if key.endswith("__r"):
+                # We assume there's only one key in this dict
+                for external_id_field, external_id in value.items():
+                    normalized[key.replace("__r", "__c")] = external_id
+            else:
+                normalized[key] = value
+        return normalized
 
 
 virtual_salesforce = VirtualSalesforce()

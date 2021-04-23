@@ -75,3 +75,49 @@ def test_crud_lifecycle_with_custom_id():
     assert result["Id"]
     assert result[custom_id_field] == custom_id
     assert result["LastName"] == "Smith"
+
+
+@mock_salesforce
+def test_crud_lifecycle_with_custom_id_and_foreign_key():
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    custom_id = "123-abc"
+    custom_id_field = "SuperId__c"
+
+    result = salesforce.Contact.upsert(
+        f"{custom_id_field}/{custom_id}",
+        {
+            "FirstName": "Seymour",
+            "LastName": "Butz",
+            f"{custom_id_field}": f"{custom_id}",
+            "CustomAccount__r": {"CustomAccountId__c": "xyz"},
+        },
+    )
+
+    assert result == 204
+
+    result = salesforce.Contact.get_by_custom_id(custom_id_field, custom_id)
+
+    assert result["Id"]
+    assert result[custom_id_field] == custom_id
+    assert result["FirstName"] == "Seymour"
+    assert result["LastName"] == "Butz"
+    assert result["CustomAccount__c"] == "xyz"
+
+    result = salesforce.Contact.upsert(
+        f"{custom_id_field}/{custom_id}",
+        {
+            "FirstName": "Pierre",
+            "LastName": "Pants",
+            f"{custom_id_field}": f"{custom_id}",
+            "CustomAccount__r": {"CustomAccountId__c": "xyz"},
+        },
+    )
+
+    result = salesforce.Contact.get_by_custom_id(custom_id_field, custom_id)
+
+    assert result["Id"]
+    assert result[custom_id_field] == custom_id
+    assert result["FirstName"] == "Pierre"
+    assert result["LastName"] == "Pants"
+    assert result["CustomAccount__c"] == "xyz"
