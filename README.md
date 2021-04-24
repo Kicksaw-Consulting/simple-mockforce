@@ -83,3 +83,9 @@ real Salesforce instance would be.
 
 There are plans to read the XML consumed by the meta API in order to enforce
 more rigidity inside the virtual instance, but this is not yet implemented.
+
+## All HTTP traffic is blocked
+
+When using `@mock_salesforce`, do note that the `requests` library is being
+patched with `responses`, so any calls you make to any other APIs will fail
+unless you patch them yourself, or patch the code which invokes.
