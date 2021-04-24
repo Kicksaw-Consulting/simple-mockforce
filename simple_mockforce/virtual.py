@@ -169,6 +169,8 @@ class VirtualSalesforce:
         """
         We need to relate an object which was pushed via an external key with a master-detail
         relationship to its related object in the virtual data
+
+        I'm not proud of this method
         """
         normalized = dict()
         for key, value in sobject.items():
@@ -176,6 +178,14 @@ class VirtualSalesforce:
                 # We assume there's only one key in this dict
                 for external_id_field, external_id in value.items():
                     related_object_name = key.replace("__r", "__c")
+                    # If this is a standard object, we have to pop-off the __c
+                    # A little dirty for sure
+                    standard_object_name = related_object_name.replace("__c", "")
+                    if (
+                        related_object_name not in self.data
+                        and standard_object_name in self.data
+                    ):
+                        related_object_name = standard_object_name
                     related_object = self.get_by_custom_id(
                         related_object_name, external_id, external_id_field
                     )

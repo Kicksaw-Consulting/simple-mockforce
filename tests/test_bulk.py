@@ -84,3 +84,55 @@ def test_bulk_lifecycle_upsert_key():
     assert fetched_by_custom_id["Id"] == fetched_by_sfdc_id["Id"]
     assert fetched_by_custom_id["Name"] == "Worst Account Ever"
     assert fetched_by_sfdc_id["Name"] == "Worst Account Ever"
+
+
+@mock_salesforce
+def test_bulk_upsert_with_relation():
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    custom_contact_id_field = "ExternalId__c"
+    custom_contact_id = "1-2-3"
+
+    response = salesforce.Contact.create(
+        {"Name": "Test Name", custom_contact_id_field: custom_contact_id}
+    )
+
+    contact_id = response["id"]
+
+    custom_message_id_field = "MessageId__c"
+    custom_message_id = "10001"
+    custom_message_id2 = "10002"
+
+    results = salesforce.bulk.MessageAttempt__c.upsert(
+        [
+            {
+                "Name": "Message 1",
+                custom_message_id_field: custom_message_id,
+                "Contact__r": {custom_contact_id_field: custom_contact_id},
+            },
+            {
+                "Name": "Message 2",
+                custom_message_id_field: custom_message_id2,
+                "Contact__r": {custom_contact_id_field: custom_contact_id},
+            },
+        ],
+        custom_message_id_field,
+    )
+
+    assert len(results) == 2
+
+    message1_id = results[0]["id"]
+
+    message1 = salesforce.MessageAttempt__c.get(message1_id)
+
+    assert message1["Name"] == "Message 1"
+    assert message1["Contact"] == contact_id
+    assert message1[custom_message_id_field] == custom_message_id
+
+    message1 = salesforce.MessageAttempt__c.get_by_custom_id(
+        custom_message_id_field, custom_message_id2
+    )
+
+    assert message1["Name"] == "Message 2"
+    assert message1["Contact"] == contact_id
+    assert message1[custom_message_id_field] == custom_message_id2
