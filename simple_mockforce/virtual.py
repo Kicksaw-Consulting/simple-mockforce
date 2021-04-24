@@ -26,7 +26,6 @@ class VirtualSalesforce:
 
     def __init__(self):
         self.create_new_virtual_instance()
-        self.data["Account"] = []
 
     def create_new_virtual_instance(self):
         """
