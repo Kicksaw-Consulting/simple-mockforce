@@ -21,7 +21,7 @@ def _dive_into_clause(
     sobject: dict, where: list, results: List[bool], previous: list = []
 ):
     for clause in where:
-        is_list = type(clause) == list and len(clause) == 3
+        is_list = type(clause) == list
         if is_list and _needs_another_dive(clause):
             _dive_into_clause(sobject, clause, results, previous)
         elif is_list:

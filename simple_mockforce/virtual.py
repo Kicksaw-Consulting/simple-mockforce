@@ -185,7 +185,7 @@ class VirtualSalesforce:
         for key, value in sobject.items():
             if key.endswith("__r"):
                 # We assume there's only one key in this dict
-                for external_id_field, external_id in value.items():
+                for external_id in value.values():
                     normalized[key.replace("__r", "__c")] = external_id
             else:
                 normalized[key] = value
