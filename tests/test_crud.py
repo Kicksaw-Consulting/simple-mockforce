@@ -97,6 +97,11 @@ def test_crud_lifecycle_with_custom_id_and_foreign_key():
     custom_id = "123-abc"
     custom_id_field = "SuperId__c"
 
+    response = salesforce.CustomAccount__c.create(
+        {"Name": "I'm Custom", "CustomAccountId__c": "xyz"}
+    )
+    custom_account_id = response["id"]
+
     result = salesforce.Contact.upsert(
         f"{custom_id_field}/{custom_id}",
         {
@@ -115,7 +120,7 @@ def test_crud_lifecycle_with_custom_id_and_foreign_key():
     assert result[custom_id_field] == custom_id
     assert result["FirstName"] == "Seymour"
     assert result["LastName"] == "Butz"
-    assert result["CustomAccount__c"] == "xyz"
+    assert result["CustomAccount__c"] == custom_account_id
 
     result = salesforce.Contact.upsert(
         f"{custom_id_field}/{custom_id}",
@@ -133,7 +138,10 @@ def test_crud_lifecycle_with_custom_id_and_foreign_key():
     assert result[custom_id_field] == custom_id
     assert result["FirstName"] == "Pierre"
     assert result["LastName"] == "Pants"
-    assert result["CustomAccount__c"] == "xyz"
+    assert result["CustomAccount__c"] == custom_account_id
+
+    result = salesforce.CustomAccount__c.get(custom_account_id)
+    assert result["CustomAccountId__c"] == "xyz"
 
 
 @mock_salesforce

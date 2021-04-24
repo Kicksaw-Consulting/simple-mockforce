@@ -166,6 +166,25 @@ class VirtualSalesforce:
         self._provision_sobject(sobject_name)
         return self.data[sobject_name]
 
+    def _normalize_relation_via_external_id_field(self, sobject: dict):
+        """
+        We need to relate an object which was pushed via an external key with a master-detail
+        relationship to its related object in the virtual data
+        """
+        normalized = dict()
+        for key, value in sobject.items():
+            if key.endswith("__r"):
+                # We assume there's only one key in this dict
+                for external_id_field, external_id in value.items():
+                    related_object_name = key.replace("__r", "__c")
+                    related_object = self.get_by_custom_id(
+                        related_object_name, external_id, external_id_field
+                    )
+                    normalized[related_object_name] = related_object["Id"]
+            else:
+                normalized[key] = value
+        return normalized
+
     def _provision_sobject(self, sobject_name: str):
         """
         Provisions a virtual Salesfoce object
@@ -178,18 +197,6 @@ class VirtualSalesforce:
     @staticmethod
     def _generate_sfdc_id():
         return "".join(random.choices(string.ascii_letters + string.digits, k=18))
-
-    @staticmethod
-    def _normalize_relation_via_external_id_field(sobject: dict):
-        normalized = dict()
-        for key, value in sobject.items():
-            if key.endswith("__r"):
-                # We assume there's only one key in this dict
-                for external_id in value.values():
-                    normalized[key.replace("__r", "__c")] = external_id
-            else:
-                normalized[key] = value
-        return normalized
 
 
 virtual_salesforce = VirtualSalesforce()
