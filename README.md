@@ -54,6 +54,12 @@ And that's about it!
 
 # Caveats
 
+## Case sensitivity
+
+Unlike a real Salesforce instance, the virtual instance will not handle case-insensitive
+dependent code for you. You must remain consistent with your casing of object and field
+names in all aspects of the code.
+
 ## Missing endpoints
 
 The following features are currently not supported:
