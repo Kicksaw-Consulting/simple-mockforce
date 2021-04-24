@@ -64,7 +64,7 @@ The following features are currently not supported:
 
 ## Queries
 
-SOQL is only partially supported as of now. Please refer to the READ ME
+SOQL is only partially supported as of now. Please refer to the README
 for [python-soql-parser](https://github.com/Kicksaw-Consulting/python-soql-parser#notable-unsupported-features)
 to see what's not yet implemented.
 
