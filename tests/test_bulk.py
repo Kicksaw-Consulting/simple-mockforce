@@ -2,31 +2,39 @@ from simple_salesforce import Salesforce
 from simple_salesforce.exceptions import SalesforceResourceNotFound
 
 from simple_mockforce import mock_salesforce
-from tests.utils import MOCK_CREDS, to_dict
+from tests.utils import MOCK_CREDS
 
 
 @mock_salesforce
 def test_bulk_lifecycle():
     salesforce = Salesforce(**MOCK_CREDS)
 
-    result = salesforce.bulk.Account.insert([{"Name": "Test Account"}])
+    result = salesforce.bulk.Account.insert(
+        [{"Name": "Test Account"}, {"Name": "Test Account 2"}]
+    )
 
-    assert len(result) == 1
+    assert len(result) == 2
     assert result[0]["success"]
+    assert result[1]["success"]
 
     sfdc_id = result[0]["id"]
+    sfdc_id2 = result[1]["id"]
 
     account = salesforce.Account.get(sfdc_id)
+    account2 = salesforce.Account.get(sfdc_id2)
 
     assert account["Name"] == "Test Account"
+    assert account2["Name"] == "Test Account 2"
 
     result = salesforce.bulk.Account.update(
         [{"Id": sfdc_id, "Name": "Test Account - updated"}]
     )
 
     account = salesforce.Account.get(sfdc_id)
+    account2 = salesforce.Account.get(sfdc_id2)
 
     assert account["Name"] == "Test Account - updated"
+    assert account2["Name"] == "Test Account 2"
 
 
 @mock_salesforce
@@ -59,10 +67,9 @@ def test_bulk_lifecycle_upsert_key():
         custom_id_field, custom_id
     )
 
-    fetched_by_custom_id.pop("attributes")
-    fetched_by_sfdc_id.pop("attributes")
-
-    assert to_dict(fetched_by_custom_id) == to_dict(fetched_by_sfdc_id)
+    assert fetched_by_custom_id["Id"] == fetched_by_sfdc_id["Id"]
+    assert fetched_by_custom_id["Name"] == "Best Account Ever"
+    assert fetched_by_sfdc_id["Name"] == "Best Account Ever"
 
     result = salesforce.bulk.Account.upsert(
         [{"Name": "Worst Account Ever", custom_id_field: custom_id}],
@@ -74,10 +81,6 @@ def test_bulk_lifecycle_upsert_key():
         custom_id_field, custom_id
     )
 
-    fetched_by_custom_id.pop("attributes")
-    fetched_by_sfdc_id.pop("attributes")
-
-    fetched_by_custom_id["Name"] == "Worst Account Ever"
-    fetched_by_sfdc_id["Name"] == "Worst Account Ever"
-
-    assert to_dict(fetched_by_custom_id) == to_dict(fetched_by_sfdc_id)
+    assert fetched_by_custom_id["Id"] == fetched_by_sfdc_id["Id"]
+    assert fetched_by_custom_id["Name"] == "Worst Account Ever"
+    assert fetched_by_sfdc_id["Name"] == "Worst Account Ever"
