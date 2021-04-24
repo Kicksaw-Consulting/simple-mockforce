@@ -1,3 +1,5 @@
+import pytest
+
 from simple_mockforce import mock_salesforce
 from simple_salesforce import Salesforce
 
@@ -49,8 +51,26 @@ def test_where_basic_query():
     assert record["Title"] == "CDO"
 
 
+@pytest.mark.parametrize(
+    "operator,number,expected",
+    [
+        # <
+        ("<", 100, 0),
+        ("<", 120, 1),
+        # <=
+        ("<=", 100, 1),
+        ("<=", 5, 0),
+        # >
+        (">", 101, 0),
+        (">", 4, 1),
+        # >=
+        (">=", 100, 1),
+        (">=", 999, 0),
+    ],
+)
 @mock_salesforce
-def test_where_comparison_query():
+def test_where_comparison_query(operator, number, expected):
+    pass
     virtual_salesforce.create_new_virtual_instance()
     salesforce = Salesforce(**MOCK_CREDS)
 
@@ -67,40 +87,16 @@ def test_where_comparison_query():
     sfdc_id = response[0]["id"]
 
     results = salesforce.query(
-        f"SELECT Id, Name, Human_Score__c FROM Lead WHERE Human_Score__c > 99"
+        f"SELECT Id, Name, Human_Score__c FROM Lead WHERE Human_Score__c {operator} {number}"
     )
     records = results["records"]
-    assert len(records) == 1
-    record = records[0]
-    assert record["Id"] == sfdc_id
-    assert record["Name"] == "Kurt Cobain"
-    assert record["Human_Score__c"] == 100
+    assert len(records) == expected
 
-    results = salesforce.query(
-        f"SELECT Id, Name, Human_Score__c FROM Lead WHERE Human_Score__c >= 100"
-    )
-    records = results["records"]
-    assert len(records) == 1
-    record = records[0]
-    assert record["Id"] == sfdc_id
-    assert record["Name"] == "Kurt Cobain"
-    assert record["Human_Score__c"] == 100
-
-    results = salesforce.query(
-        f"SELECT Id, Name, Human_Score__c FROM Lead WHERE Human_Score__c < 5"
-    )
-    records = results["records"]
-    assert len(records) == 0
-
-    results = salesforce.query(
-        f"SELECT Id, Name, Human_Score__c FROM Lead WHERE Human_Score__c <= 100"
-    )
-    records = results["records"]
-    assert len(records) == 1
-    record = records[0]
-    assert record["Id"] == sfdc_id
-    assert record["Name"] == "Kurt Cobain"
-    assert record["Human_Score__c"] == 100
+    if expected > 0:
+        record = records[0]
+        assert record["Id"] == sfdc_id
+        assert record["Name"] == "Kurt Cobain"
+        assert record["Human_Score__c"] == 100
 
 
 @mock_salesforce

@@ -1,6 +1,8 @@
 import re
 import responses
 
+import decorator
+
 from simple_mockforce.callbacks import (
     bulk_callback,
     bulk_detail_callback,
@@ -29,7 +31,7 @@ from simple_mockforce.utils import terminate_regex
 
 
 def mock_salesforce(func):
-    def wrapper(*args, **kwargs):
+    def wrapper(func, *args, **kwargs):
         with responses.RequestsMock(assert_all_requests_are_fired=False) as rsps:
             rsps.add(
                 responses.POST,
@@ -100,4 +102,4 @@ def mock_salesforce(func):
             )
             func(*args, **kwargs)
 
-    return wrapper
+    return decorator.decorator(wrapper, func)
