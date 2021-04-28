@@ -78,6 +78,10 @@ You should only expect this library to be able to mock the most basic of queries
 While there are plans to, mocking query calls which traverse object relationships
 or that use SOQL-specific where-clause tokens are not yet supported.
 
+Notable mentions:
+
+- be explicit with direction in `ORDER BY` clauses, i.e., always supply `DESC` or `ASC`
+
 ## Error handling
 
 Error handling is only mocked to a degree, and for some calls it isn't at all.
