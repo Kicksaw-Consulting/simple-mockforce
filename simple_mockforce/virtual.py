@@ -3,6 +3,7 @@ import random
 import string
 
 from python_soql_parser import parse
+from python_soql_parser.core import DESC, ASC
 
 from simple_salesforce.exceptions import SalesforceResourceNotFound
 
@@ -59,9 +60,32 @@ class VirtualSalesforce:
         where = parse_results["where"].asList()
 
         limit = parse_results["limit"].asList()
+
+        # TODO: why do we need to check?
+        order_by = (
+            parse_results["order_by"].asList() if "order_by" in parse_results else None
+        )
         sobjects = self.get_sobjects(sobject)
 
         records = list()
+
+        if order_by:
+            sort_keys = list()
+            for order in order_by[0]:
+                direction = ASC
+                if order[-1] == DESC or order[-1] == ASC:
+                    direction = order.pop()
+                sort_keys.append((order, direction))
+
+            for sort_key in sort_keys:
+
+                def order_records(record):
+                    sort_tuple = tuple()
+                    for key in sort_key[0]:
+                        sort_tuple += tuple(record[key])
+                    return sort_tuple
+
+                sobjects.sort(key=order_records, reverse=sort_key[1] == DESC)
 
         for sobject in sobjects:
             passes = filter_by_where_clause(sobject, where)

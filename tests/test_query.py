@@ -152,3 +152,28 @@ def test_where_complex_query():
     assert len(records) == 1
     record = records[0]
     assert record["Id"] == tarantino_id
+
+
+@mock_salesforce
+def test_order_by_query():
+    virtual_salesforce.create_new_virtual_instance()
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    salesforce.bulk.Account.insert(
+        [
+            {"Name": "Google", "AlexaRanking__c": 1},
+            {"Name": "YouTube", "AlexaRanking__c": 2},
+            {"Name": "Facebook", "AlexaRanking__c": 7},
+        ]
+    )
+
+    results = salesforce.query("SELECT Id, Name FROM Account ORDER BY Name ASC")
+    records = results["records"]
+
+    record1 = records[0]
+    record2 = records[1]
+    record3 = records[2]
+
+    assert record1["Name"] == "Facebook"
+    assert record2["Name"] == "Google"
+    assert record3["Name"] == "YouTube"
