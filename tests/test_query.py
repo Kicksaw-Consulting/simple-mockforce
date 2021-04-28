@@ -167,7 +167,7 @@ def test_order_by_query():
         ]
     )
 
-    results = salesforce.query("SELECT Id, Name FROM Account ORDER BY Name ASC")
+    results = salesforce.query("SELECT Name FROM Account ORDER BY Name ASC")
     records = results["records"]
 
     record1 = records[0]
@@ -178,7 +178,7 @@ def test_order_by_query():
     assert record2["Name"] == "Google"
     assert record3["Name"] == "YouTube"
 
-    results = salesforce.query("SELECT Id, Name FROM Account ORDER BY Name DESC")
+    results = salesforce.query("SELECT Name FROM Account ORDER BY Name DESC")
     records = results["records"]
 
     record1 = records[0]
@@ -188,3 +188,23 @@ def test_order_by_query():
     assert record3["Name"] == "Facebook"
     assert record2["Name"] == "Google"
     assert record1["Name"] == "YouTube"
+
+    # not possible, but let's pretend
+    salesforce.Account.create(
+        {"Name": "Google dupe", "AlexaRanking__c": 1},
+    )
+
+    results = salesforce.query(
+        "SELECT Name FROM Account ORDER BY AlexaRanking__c ASC, Name DESC"
+    )
+    records = results["records"]
+
+    record1 = records[0]
+    record2 = records[1]
+    record3 = records[2]
+    record4 = records[3]
+
+    assert record1["Name"] == "Google dupe"
+    assert record2["Name"] == "Google"
+    assert record3["Name"] == "YouTube"
+    assert record4["Name"] == "Facebook"
