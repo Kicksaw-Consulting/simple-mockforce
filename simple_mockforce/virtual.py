@@ -5,10 +5,9 @@ import string
 from python_soql_parser import parse
 from python_soql_parser.core import DESC, ASC
 
-from simple_salesforce.exceptions import SalesforceResourceNotFound
-
-from simple_mockforce.query import (
+from simple_mockforce.query_algorithms import (
     filter_by_where_clause,
+    sort_by_order_by_clause,
 )
 from simple_mockforce.utils import find_object_and_index
 
@@ -70,22 +69,7 @@ class VirtualSalesforce:
         records = list()
 
         if order_by:
-            sort_keys = list()
-            for order in order_by[0]:
-                direction = ASC
-                if order[-1] == DESC or order[-1] == ASC:
-                    direction = order.pop()
-                sort_keys.append((order, direction))
-
-            for sort_key in sort_keys:
-
-                def order_records(record):
-                    sort_tuple = tuple()
-                    for key in sort_key[0]:
-                        sort_tuple += tuple(record[key])
-                    return sort_tuple
-
-                sobjects.sort(key=order_records, reverse=sort_key[1] == DESC)
+            sort_by_order_by_clause(sobjects, order_by)
 
         for sobject in sobjects:
             passes = filter_by_where_clause(sobject, where)

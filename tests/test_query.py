@@ -177,3 +177,14 @@ def test_order_by_query():
     assert record1["Name"] == "Facebook"
     assert record2["Name"] == "Google"
     assert record3["Name"] == "YouTube"
+
+    results = salesforce.query("SELECT Id, Name FROM Account ORDER BY Name DESC")
+    records = results["records"]
+
+    record1 = records[0]
+    record2 = records[1]
+    record3 = records[2]
+
+    assert record3["Name"] == "Facebook"
+    assert record2["Name"] == "Google"
+    assert record1["Name"] == "YouTube"
