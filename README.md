@@ -34,20 +34,26 @@ def test_api():
         security_token=os.getenv["SFDC_SECURITY_TOKEN"]
     )
 
-    salesforce.Account.create({"Name": "Test Account"})
+    response = salesforce.Account.create({"Name": "Test Account"})
+
+    account_id = response["id"]
+
+    account = salesforce.Account.get(account_id)
+
+    assert account["Name"] == "Test Account"
 ```
 
-To reset state, you can call `create_new_virtual_instance`,
+To reset state, you can pass `fresh=True`,
 ensuring there's no pollution between tests
 
 ```python
 from simple_mockforce.virtual import virtual_salesforce
 
 
-@mock_salesforce
+# This will wipe away the account created in the above step
+@mock_salesforce(fresh=True)
 def test_api_again():
-    # This will wipe away the account created in the above step
-    virtual_salesforce.create_new_virtual_instance()
+    pass
 ```
 
 And that's about it!
@@ -98,4 +104,4 @@ more rigidity inside the virtual instance, but this is not yet implemented.
 
 When using `@mock_salesforce`, do note that the `requests` library is being
 patched with `responses`, so any calls you make to any other APIs will fail
-unless you patch them yourself, or patch the code which invokes.
+unless you patch them yourself, or patch the code which invokes said calls.

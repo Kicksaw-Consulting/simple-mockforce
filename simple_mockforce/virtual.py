@@ -25,9 +25,9 @@ class VirtualSalesforce:
     """
 
     def __init__(self):
-        self.create_new_virtual_instance()
+        self.provision()
 
-    def create_new_virtual_instance(self):
+    def provision(self):
         """
         Starts a virtual Salesforce instance from scratch. Useful to prevent test pollution
         """

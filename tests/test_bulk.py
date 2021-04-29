@@ -5,7 +5,7 @@ from simple_mockforce import mock_salesforce
 from tests.utils import MOCK_CREDS
 
 
-@mock_salesforce
+@mock_salesforce(fresh=True)
 def test_bulk_lifecycle():
     salesforce = Salesforce(**MOCK_CREDS)
 

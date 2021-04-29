@@ -7,9 +7,8 @@ from simple_mockforce.virtual import virtual_salesforce
 from tests.utils import MOCK_CREDS
 
 
-@mock_salesforce
+@mock_salesforce(fresh=True)
 def test_basic_query():
-    virtual_salesforce.create_new_virtual_instance()
     salesforce = Salesforce(**MOCK_CREDS)
 
     salesforce.Contact.create({"Name": "Ozzy Osbourne"})
@@ -23,9 +22,8 @@ def test_basic_query():
     assert record["Name"] == "Ozzy Osbourne"
 
 
-@mock_salesforce
+@mock_salesforce(fresh=True)
 def test_where_basic_query():
-    virtual_salesforce.create_new_virtual_instance()
     salesforce = Salesforce(**MOCK_CREDS)
 
     response = salesforce.Lead.create({"Name": "Jim Bean", "Title": "CDO"})
@@ -51,9 +49,8 @@ def test_where_basic_query():
     assert record["Title"] == "CDO"
 
 
-@mock_salesforce
+@mock_salesforce(fresh=True)
 def test_where_bool_query():
-    virtual_salesforce.create_new_virtual_instance()
     salesforce = Salesforce(**MOCK_CREDS)
 
     response = salesforce.Opportunity.create({"Name": "Opp 1", "IsDeleted": True})
@@ -103,10 +100,8 @@ def test_where_bool_query():
         (">=", 999, 0),
     ],
 )
-@mock_salesforce
+@mock_salesforce(fresh=True)
 def test_where_comparison_query(operator, number, expected):
-    pass
-    virtual_salesforce.create_new_virtual_instance()
     salesforce = Salesforce(**MOCK_CREDS)
 
     response = salesforce.bulk.Lead.insert(
@@ -134,9 +129,8 @@ def test_where_comparison_query(operator, number, expected):
         assert record["Human_Score__c"] == 100
 
 
-@mock_salesforce
+@mock_salesforce(fresh=True)
 def test_where_complex_query():
-    virtual_salesforce.create_new_virtual_instance()
     salesforce = Salesforce(**MOCK_CREDS)
 
     response = salesforce.SomeFamousPerson__c.create(
@@ -189,9 +183,8 @@ def test_where_complex_query():
     assert record["Id"] == tarantino_id
 
 
-@mock_salesforce
+@mock_salesforce(fresh=True)
 def test_order_by_query():
-    virtual_salesforce.create_new_virtual_instance()
     salesforce = Salesforce(**MOCK_CREDS)
 
     salesforce.bulk.Account.insert(
