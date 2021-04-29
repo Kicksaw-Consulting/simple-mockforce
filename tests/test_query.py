@@ -51,6 +51,41 @@ def test_where_basic_query():
     assert record["Title"] == "CDO"
 
 
+@mock_salesforce
+def test_where_bool_query():
+    virtual_salesforce.create_new_virtual_instance()
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    response = salesforce.Opportunity.create({"Name": "Opp 1", "IsDeleted": True})
+    deleted_opp_id = response["id"]
+    response = salesforce.Opportunity.create({"Name": "Opp 2", "IsDeleted": False})
+    active_opp_id = response["id"]
+
+    results = salesforce.query(
+        f"SELECT Id, Name, IsDeleted FROM Opportunity WHERE IsDeleted = true"
+    )
+    records = results["records"]
+    assert len(records) == 1
+    deleted_record = records[0]
+    assert deleted_record["Name"] == "Opp 1"
+    assert deleted_record["Id"] == deleted_opp_id
+    assert deleted_record["IsDeleted"]
+
+    results = salesforce.query(
+        f"SELECT Id, Name, IsDeleted FROM Opportunity WHERE IsDeleted = false"
+    )
+    records = results["records"]
+    assert len(records) == 1
+    active_record = records[0]
+    assert active_record["Name"] == "Opp 2"
+    assert active_record["Id"] == active_opp_id
+    assert not active_record["IsDeleted"]
+
+    results = salesforce.query(f"SELECT Id FROM Opportunity")
+    records = results["records"]
+    assert len(records) == 2
+
+
 @pytest.mark.parametrize(
     "operator,number,expected",
     [

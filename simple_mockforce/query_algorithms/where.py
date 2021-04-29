@@ -1,7 +1,7 @@
 from typing import List, Tuple, Union
 
 from python_soql_parser.binops import EQ, NEQ, LT, LTE, GT, GTE
-from python_soql_parser.core import AND, OR, IN, NULL
+from python_soql_parser.core import AND, OR, IN, NULL, TRUE, FALSE
 
 
 def filter_by_where_clause(sobject: dict, where: list) -> bool:
@@ -89,7 +89,7 @@ def _parse_clause(clause: list) -> Union[str, List[str]]:
             value = [_clean_string(dirty_value) for value in values]
     else:
         value = _clean_string(dirty_value)
-    return field, binop, _coerce_to_none_if_applicable(value)
+    return field, binop, _to_python(value)
 
 
 def _clean_string(value):
@@ -98,7 +98,13 @@ def _clean_string(value):
     return value
 
 
-def _coerce_to_none_if_applicable(value: Union[str, list]):
+def _to_python(value: Union[str, list]):
     if type(value) == list:
         return [x if x != NULL else None for x in value]
-    return value if value != NULL else None
+    if value == TRUE:
+        return True
+    elif value == FALSE:
+        return False
+    elif value == NULL:
+        return None
+    return value
