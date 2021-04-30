@@ -90,8 +90,12 @@ class VirtualSalesforce:
             if parent_fields:
                 for parent_field in parent_fields:
                     parent_sobject_name, parent_field = parent_field.split(".")
+                    normalized_parent_sobject_name = (
+                        self._related_object_name_to_object_name(parent_sobject_name)
+                    )
                     parent_object = self.get(
-                        parent_sobject_name, sobject[parent_sobject_name]
+                        normalized_parent_sobject_name,
+                        sobject[normalized_parent_sobject_name],
                     )
                     if parent_sobject_name not in record:
                         record[parent_sobject_name] = dict()
@@ -207,7 +211,7 @@ class VirtualSalesforce:
             if key.endswith("__r"):
                 # We assume there's only one key in this dict
                 for external_id_field, external_id in value.items():
-                    related_object_name = key.replace("__r", "__c")
+                    related_object_name = self._related_object_name_to_object_name(key)
                     # If this is a standard object, we have to pop-off the __c
                     # A little dirty for sure
                     standard_object_name = related_object_name.replace("__c", "")
@@ -223,6 +227,10 @@ class VirtualSalesforce:
             else:
                 normalized[key] = value
         return normalized
+
+    @staticmethod
+    def _related_object_name_to_object_name(related_object_name: str):
+        return related_object_name.replace("__r", "__c")
 
     def _provision_sobject(self, sobject_name: str):
         """

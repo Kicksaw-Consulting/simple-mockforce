@@ -256,7 +256,7 @@ def test_query_with_parent_object_attribute():
     contact_id = response["id"]
 
     results = salesforce.query(
-        "SELECT Id, Title, FirstName, LastName, Account.Name FROM Contact LIMIT 1"
+        "SELECT Id, Title, FirstName, LastName, Account.Name FROM Contact"
     )
     records = results["records"]
 
@@ -267,3 +267,28 @@ def test_query_with_parent_object_attribute():
     assert record["LastName"] == "Pichai"
     assert record["Title"] == "CEO"
     assert record["Account"]["Name"] == "Google"
+
+
+@mock_salesforce(fresh=True)
+def test_query_with_custom_parent_object_attribute():
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    response = salesforce.CustomObj__c.create({"Name": "I'm Custom"})
+    custom_object_id = response["id"]
+
+    response = salesforce.Lead.create(
+        {
+            "Name": "Super Lead",
+            "CustomObj__c": custom_object_id,
+        }
+    )
+    lead_id = response["id"]
+
+    results = salesforce.query("SELECT Id, Name, CustomObj__r.Name FROM Lead")
+    records = results["records"]
+
+    assert len(records) == 1
+    record = records[0]
+    assert record["Id"] == lead_id
+    assert record["Name"] == "Super Lead"
+    assert record["CustomObj__r"]["Name"] == "I'm Custom"
