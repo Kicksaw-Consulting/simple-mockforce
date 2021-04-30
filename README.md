@@ -87,6 +87,7 @@ or that use SOQL-specific where-clause tokens are not yet supported.
 Notable mentions:
 
 - be explicit with direction in `ORDER BY` clauses, i.e., always supply `DESC` or `ASC`
+- attributes of parent objects can be specified in the `select` clause (but not in the `where` clause)
 
 ## Error handling
 
