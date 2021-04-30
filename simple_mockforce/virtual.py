@@ -55,7 +55,16 @@ class VirtualSalesforce:
             sobject
         ), f"{parsed_sobject} not present in the virtual Salesforce objects"
 
-        fields = parse_results["fields"].asList()
+        all_fields = parse_results["fields"].asList()
+        fields = list()
+        parent_fields = list()
+
+        for field in all_fields:
+            if "." in field:
+                parent_fields.append(field)
+            else:
+                fields.append(field)
+
         where = parse_results["where"].asList()
 
         limit = parse_results["limit"].asList()
@@ -77,6 +86,19 @@ class VirtualSalesforce:
                 continue
 
             record = {field: sobject.get(field) for field in fields}
+
+            if parent_fields:
+                for parent_field in parent_fields:
+                    parent_sobject_name, parent_field = parent_field.split(".")
+                    parent_object = self.get(
+                        parent_sobject_name, sobject[parent_sobject_name]
+                    )
+                    if parent_sobject_name not in record:
+                        record[parent_sobject_name] = dict()
+                    record[parent_sobject_name][parent_field] = parent_object[
+                        parent_field
+                    ]
+
             records.append(record)
 
         if limit:

@@ -182,7 +182,7 @@ testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "requests", "xm
 
 [[package]]
 name = "python-soql-parser"
-version = "0.1.8"
+version = "0.1.9"
 description = "A pyparsing-based library for parsing SOQL statements"
 category = "main"
 optional = false
@@ -386,8 +386,8 @@ pytest = [
     {file = "pytest-5.4.3.tar.gz", hash = "sha256:7979331bfcba207414f5e1263b5a0f8f521d0f457318836a7355531ed1a4c7d8"},
 ]
 python-soql-parser = [
-    {file = "python-soql-parser-0.1.8.tar.gz", hash = "sha256:e09ed7b3738d99ad9dfabc6f214dcd58e77a01d7da6e7329013510eeb5ce73a7"},
-    {file = "python_soql_parser-0.1.8-py3-none-any.whl", hash = "sha256:89e06b63d6cec1d3e7f65bcd3883e1d603fcd941f229092a040f9dcc32155146"},
+    {file = "python-soql-parser-0.1.9.tar.gz", hash = "sha256:d5c0b267fd572c2ce59f3622ad8bfc04ab71311c319da6770011e9c2072f358d"},
+    {file = "python_soql_parser-0.1.9-py3-none-any.whl", hash = "sha256:78522f4f0c7fd99a2d4722d5cce5200ca3a531b6d8ee637d2b8fb75a7d8496b1"},
 ]
 requests = [
     {file = "requests-2.25.1-py2.py3-none-any.whl", hash = "sha256:c210084e36a42ae6b9219e00e48287def368a26d03a048ddad7bfee44f75871e"},

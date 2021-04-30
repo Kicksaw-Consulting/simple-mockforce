@@ -236,3 +236,34 @@ def test_order_by_query():
     assert record2["Name"] == "Google"
     assert record3["Name"] == "YouTube"
     assert record4["Name"] == "Facebook"
+
+
+@mock_salesforce(fresh=True)
+def test_query_with_parent_object_attribute():
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    response = salesforce.Account.create({"Name": "Google", "Website": "google.com"})
+    account_id = response["id"]
+
+    response = salesforce.Contact.create(
+        {
+            "FirstName": "Sundar",
+            "LastName": "Pichai",
+            "Account": account_id,
+            "Title": "CEO",
+        }
+    )
+    contact_id = response["id"]
+
+    results = salesforce.query(
+        "SELECT Id, Title, FirstName, LastName, Account.Name FROM Contact LIMIT 1"
+    )
+    records = results["records"]
+
+    assert len(records) == 1
+    record = records[0]
+    assert record["Id"] == contact_id
+    assert record["FirstName"] == "Sundar"
+    assert record["LastName"] == "Pichai"
+    assert record["Title"] == "CEO"
+    assert record["Account"]["Name"] == "Google"
