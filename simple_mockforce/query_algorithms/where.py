@@ -47,6 +47,7 @@ def _evaluate_boolean_expression(previous: list, current_bool: bool):
     # previous is a pass by reference hack to allow us to keep track of
     # whether or not we need to account for a boolean in the where condition
     # Clear the data stored in the reference once it's been accounted for
+    # TODO: just use a class; would be cleaner to track state in an instance rather than this
     previous.clear()
     return passes
 
