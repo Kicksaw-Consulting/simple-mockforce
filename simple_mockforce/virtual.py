@@ -6,6 +6,7 @@ from python_soql_parser import parse
 from python_soql_parser.core import DESC, ASC
 
 from simple_mockforce.query_algorithms import (
+    add_parent_object_attributes,
     filter_by_where_clause,
     sort_by_order_by_clause,
 )
@@ -88,20 +89,7 @@ class VirtualSalesforce:
             record = {field: sobject.get(field) for field in fields}
 
             if parent_fields:
-                for parent_field in parent_fields:
-                    parent_sobject_name, parent_field = parent_field.split(".")
-                    normalized_parent_sobject_name = (
-                        self._related_object_name_to_object_name(parent_sobject_name)
-                    )
-                    parent_object = self.get(
-                        normalized_parent_sobject_name,
-                        sobject[normalized_parent_sobject_name],
-                    )
-                    if parent_sobject_name not in record:
-                        record[parent_sobject_name] = dict()
-                    record[parent_sobject_name][parent_field] = parent_object[
-                        parent_field
-                    ]
+                add_parent_object_attributes(sobject, record, parent_fields, self)
 
             records.append(record)
 

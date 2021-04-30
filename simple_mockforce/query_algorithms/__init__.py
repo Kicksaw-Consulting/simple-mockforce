@@ -1,2 +1,3 @@
+from simple_mockforce.query_algorithms.parent_attrs import add_parent_object_attributes
 from simple_mockforce.query_algorithms.order_by import sort_by_order_by_clause
 from simple_mockforce.query_algorithms.where import filter_by_where_clause
