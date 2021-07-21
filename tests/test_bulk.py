@@ -136,3 +136,41 @@ def test_bulk_upsert_with_relation():
     assert message1["Name"] == "Message 2"
     assert message1["Contact"] == contact_id
     assert message1[custom_message_id_field] == custom_message_id2
+
+
+@mock_salesforce
+def test_bulk_upsert_with_weird_relation():
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    custom_account_id_field = "CustomId__c"
+    custom_account_id = "123abc"
+
+    response = salesforce.Account.create(
+        {"Name": "Test Name", custom_account_id_field: custom_account_id}
+    )
+
+    account_id = response["id"]
+
+    deal_id_field = "DealId__c"
+    deal_id_value = "10001"
+
+    results = salesforce.bulk.Deal__c.upsert(
+        [
+            {
+                "Name": "Deal 1",
+                deal_id_field: deal_id_value,
+                "Company__r": {custom_account_id_field: custom_account_id},
+            }
+        ],
+        deal_id_field,
+    )
+
+    assert len(results) == 1
+
+    deal_id = results[0]["id"]
+
+    deal = salesforce.Deal__c.get(deal_id)
+
+    assert deal["Name"] == "Deal 1"
+    assert deal["Company__c"] == account_id
+    assert deal[deal_id_field] == deal_id_value
