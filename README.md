@@ -106,3 +106,19 @@ more rigidity inside the virtual instance, but this is not yet implemented.
 When using `@mock_salesforce`, do note that the `requests` library is being
 patched with `responses`, so any calls you make to any other APIs will fail
 unless you patch them yourself, or patch the code which invokes said calls.
+
+## Relations
+
+Relations are the weakest part of this library, and some features are just
+plain not supported yet.
+
+If you have a relational field that points to an object whose name cannot be
+inferred from the field name (e.g., from `Account__r` it can be inferred
+that this is pointing to an `Account` object), you can create a file called
+`relations.json` that translates a relational field name to your intended
+Salesforce object's name. See `relations.json` in the test folder for an
+example.
+
+To specify the location of `relations.json`, set an environment variable
+called `MOCKFORCE_RELATIONS_ROOT` which points to the parent folder of
+`relations.json`. Note, this defaults to the current directory `.`.

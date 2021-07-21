@@ -25,6 +25,8 @@ jobs:
       - name: Pytest
         run: |
           poetry run pytest
+        env:
+          MOCKFORCE_RELATIONS_ROOT: tests
       - name: Slack Notifications
         uses: Kicksaw-Consulting/notify-slack-action@master
         if: always()
@@ -33,4 +35,4 @@ jobs:
           notify_when: "failure"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          STAGE: "test"
+          STAGE: test

@@ -1,9 +1,12 @@
 # TODO: determine if provisioning should be implicit like it is now, or if it should be explicitly done
+import json
+import os
 import random
 import string
 
+from pathlib import Path
+
 from python_soql_parser import parse
-from python_soql_parser.core import DESC, ASC
 
 from simple_mockforce.query_algorithms import (
     add_parent_object_attributes,
@@ -27,6 +30,15 @@ class VirtualSalesforce:
 
     def __init__(self):
         self.provision()
+
+        # temporary support for related object field names that don't
+        # match the name of the related object, e.g., we can do Account__r,
+        # but need this for when Company__r corresponds to an Account object
+        path_to_relations_root = os.getenv("MOCKFORCE_RELATIONS_ROOT", ".")
+        path_to_relations_json = Path(path_to_relations_root) / "relations.json"
+        with open(path_to_relations_json) as file:
+            relations_file = json.load(file)
+        self.relations_file = relations_file
 
     def provision(self):
         """
@@ -199,19 +211,29 @@ class VirtualSalesforce:
             if key.endswith("__r"):
                 # We assume there's only one key in this dict
                 for external_id_field, external_id in value.items():
-                    related_object_name = self._related_object_name_to_object_name(key)
+                    relational_field_name = self._related_object_name_to_object_name(
+                        key
+                    )
+                    # if the related object name can't be inferred from the field name
+                    # check the manually specified mapping
+                    if key in self.relations_file:
+                        related_object_name = self.relations_file[key]
+                    # o/w infer it automatically
+                    else:
+                        related_object_name = relational_field_name
                     # If this is a standard object, we have to pop-off the __c
-                    # A little dirty for sure
+                    # A little dirty for sure, especially since we overwrite relational_field_name
                     standard_object_name = related_object_name.replace("__c", "")
                     if (
                         related_object_name not in self.data
                         and standard_object_name in self.data
                     ):
                         related_object_name = standard_object_name
+                        relational_field_name = standard_object_name
                     related_object = self.get_by_custom_id(
                         related_object_name, external_id, external_id_field
                     )
-                    normalized[related_object_name] = related_object["Id"]
+                    normalized[relational_field_name] = related_object["Id"]
             else:
                 normalized[key] = value
         return normalized
