@@ -2,7 +2,7 @@
 
 This library was inspired by [moto](https://github.com/spulec/moto) and mimics some of its design. Mainly,
 no `simple-salesforce` code is patched; instead, the HTTP calls it makes are intercepted, and state is
-stored in an in-memory, virtual Salesforce instance, which is just a globally instantiated class that
+stored in an in-memory, virtual Salesforce organization, which is just a globally instantiated class that
 is created at the run-time of a test-suite.
 
 # Installation
@@ -16,7 +16,7 @@ or, with poetry
 # Usage
 
 To patch calls to the Salesforce API and instead interact with the "virtual"
-Salesforce instance provided by this library, add the following:
+Salesforce organization provided by this library, add the following:
 
 ```python
 import os
@@ -62,7 +62,7 @@ And that's about it!
 
 ## Case sensitivity
 
-Unlike a real Salesforce instance, the virtual instance will not handle case-insensitive
+Unlike a real Salesforce organization, the virtual organization will not handle case-insensitive
 dependent code for you. You must remain consistent with your casing of object and field
 names in all aspects of the code.
 
@@ -92,14 +92,14 @@ Notable mentions:
 ## Error handling
 
 Error handling is only mocked to a degree, and for some calls it isn't at all.
-This is because the virtual Salesforce instance does not yet enforce any of
+This is because the virtual Salesforce organization does not yet enforce any of
 the server-side validation when working with a real API.
 
-This means that the virtual instance is much more permissive and loose than a
-real Salesforce instance would be.
+This means that the virtual organization is much more permissive and loose than a
+real Salesforce organization would be.
 
 There are plans to read the XML consumed by the meta API in order to enforce
-more rigidity inside the virtual instance, but this is not yet implemented.
+more rigidity inside the virtual organization, but this is not yet implemented.
 
 ## All HTTP traffic is blocked
 
