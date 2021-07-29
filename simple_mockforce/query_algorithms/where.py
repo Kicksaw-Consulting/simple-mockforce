@@ -1,7 +1,12 @@
+import datetime
+
+# explicity import this so we can monkeypatch it in the tests
+from datetime import date
 from typing import List, Tuple, Union
 
 from python_soql_parser.binops import EQ, NEQ, LT, LTE, GT, GTE
 from python_soql_parser.core import AND, OR, IN, NULL, TRUE, FALSE
+from python_soql_parser.tokens import TODAY, TOMORROW, YESTERDAY
 
 
 def filter_by_where_clause(sobject: dict, where: list) -> bool:
@@ -52,12 +57,28 @@ def _evaluate_boolean_expression(previous: list, current_bool: bool):
     return passes
 
 
+def parse_date(value: str):
+    try:
+        return datetime.datetime.strptime(value, "%Y-%m-%d")
+    except (ValueError, TypeError):
+        return None
+
+
 def _evaluate_condition(
     sobject: dict, field: str, binop: str, value: Union[str, List[str]]
 ):
     if field not in sobject:
         return False
     field_value = sobject[field]
+
+    date_value = parse_date(field_value)
+    if date_value:
+        field_value = date_value
+
+    # check if we're comparing None to a date
+    if not field_value and isinstance(value, datetime.date):
+        return False
+
     if binop == EQ:
         return field_value == value
     elif binop == IN:
@@ -108,4 +129,10 @@ def _to_python(value: Union[str, list]):
         return False
     elif value == NULL:
         return None
+    elif value == YESTERDAY:
+        return date.today() - datetime.timedelta(days=1)
+    elif value == TODAY:
+        return date.today()
+    elif value == TOMORROW:
+        return date.today() + datetime.timedelta(days=1)
     return value

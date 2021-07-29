@@ -1,10 +1,15 @@
+import datetime
+
 import pytest
+
+from python_soql_parser.tokens import TODAY, TOMORROW, YESTERDAY
 
 from simple_mockforce import mock_salesforce
 from simple_salesforce import Salesforce
 
-from simple_mockforce.virtual import virtual_salesforce
 from tests.utils import MOCK_CREDS
+
+import simple_mockforce.query_algorithms.where as where_module
 
 
 @mock_salesforce(fresh=True)
@@ -292,3 +297,78 @@ def test_query_with_custom_parent_object_attribute():
     assert record["Id"] == lead_id
     assert record["Name"] == "Super Lead"
     assert record["CustomObj__r"]["Name"] == "I'm Custom"
+
+
+class JamesDOB:
+    def today(*args, **kwargs):
+        return datetime.datetime(1963, 8, 3)
+
+
+class DayBeforeLarsDOB:
+    def today(*args, **kwargs):
+        return datetime.datetime(1963, 12, 25)
+
+
+class DayAfterLarsDOB:
+    def today(*args, **kwargs):
+        return datetime.datetime(1963, 12, 27)
+
+
+@mock_salesforce(fresh=True)
+def test_where_query_with_dates(monkeypatch):
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    monkeypatch.setattr(where_module, "date", JamesDOB)
+
+    salesforce.bulk.Lead.insert(
+        [
+            {
+                "Name": "James Hetfield",
+                "Title": "Metallica's Frontman",
+                "DOB__c": "1963-08-03",
+            },
+            {
+                "Name": "Lars Ulrich",
+                "Title": "Metallica's Drummer",
+                "DOB__c": "1963-12-26",
+            },
+            {
+                "Name": "Kirk Hammet",
+                "Title": "Metallica's Lead Guitarist",
+                "DOB__c": None,
+            },
+            {
+                "Name": "Robert Trujillo",
+                "Title": "Metallica's Bassist",
+                "DOB__c": "1964-10-23",
+            },
+        ]
+    )
+
+    results = salesforce.query(f"SELECT Name FROM Lead WHERE DOB__c = {TODAY}")
+    records = results["records"]
+    assert len(records) == 1
+    record = records[0]
+    assert record["Name"] == "James Hetfield"
+
+    monkeypatch.setattr(where_module, "date", DayBeforeLarsDOB)
+
+    results = salesforce.query(f"SELECT Name FROM Lead WHERE DOB__c = {TOMORROW}")
+    records = results["records"]
+    assert len(records) == 1
+    record = records[0]
+    assert record["Name"] == "Lars Ulrich"
+
+    monkeypatch.setattr(where_module, "date", DayAfterLarsDOB)
+
+    results = salesforce.query(f"SELECT Name FROM Lead WHERE DOB__c = {YESTERDAY}")
+    records = results["records"]
+    assert len(records) == 1
+    record = records[0]
+    assert record["Name"] == "Lars Ulrich"
+
+    results = salesforce.query(f"SELECT Name FROM Lead WHERE DOB__c > {YESTERDAY}")
+    records = results["records"]
+    assert len(records) == 1
+    record = records[0]
+    assert record["Name"] == "Robert Trujillo"
