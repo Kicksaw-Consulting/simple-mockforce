@@ -301,17 +301,17 @@ def test_query_with_custom_parent_object_attribute():
 
 class JamesDOB:
     def today(*args, **kwargs):
-        return datetime.datetime(1963, 8, 3)
+        return datetime.date(1963, 8, 3)
 
 
 class DayBeforeLarsDOB:
     def today(*args, **kwargs):
-        return datetime.datetime(1963, 12, 25)
+        return datetime.date(1963, 12, 25)
 
 
 class DayAfterLarsDOB:
     def today(*args, **kwargs):
-        return datetime.datetime(1963, 12, 27)
+        return datetime.date(1963, 12, 27)
 
 
 @mock_salesforce(fresh=True)

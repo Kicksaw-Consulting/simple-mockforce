@@ -59,7 +59,7 @@ def _evaluate_boolean_expression(previous: list, current_bool: bool):
 
 def parse_date(value: str):
     try:
-        return datetime.datetime.strptime(value, "%Y-%m-%d")
+        return datetime.datetime.strptime(value, "%Y-%m-%d").date()
     except (ValueError, TypeError):
         return None
 
