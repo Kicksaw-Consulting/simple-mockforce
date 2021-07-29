@@ -36,9 +36,12 @@ class VirtualSalesforce:
         # but need this for when Company__r corresponds to an Account object
         path_to_relations_root = os.getenv("MOCKFORCE_RELATIONS_ROOT", ".")
         path_to_relations_json = Path(path_to_relations_root) / "relations.json"
-        with open(path_to_relations_json) as file:
-            relations_file = json.load(file)
-        self.relations_file = relations_file
+        try:
+            with open(path_to_relations_json) as file:
+                relations_file = json.load(file)
+            self.relations_file = relations_file
+        except FileNotFoundError:
+            self.relations_file = {}
 
     def provision(self):
         """
