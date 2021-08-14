@@ -174,3 +174,21 @@ def test_bulk_upsert_with_weird_relation():
     assert deal["Name"] == "Deal 1"
     assert deal["Company__c"] == account_id
     assert deal[deal_id_field] == deal_id_value
+
+
+@mock_salesforce(fresh=True)
+def test_bulk_upsert_with_duplicate_items_in_batch():
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    data = [
+        {"UpsertKey__c": "1a2b3c", "Name": "Name 1"},
+        {"UpsertKey__c": "1a2b3c", "Name": "Name 2"},
+    ]
+
+    results = salesforce.bulk.Lead.upsert(data, "UpsertKey__c")
+
+    assert len(results) == 2
+
+    for record in results:
+        assert not record["success"]
+        assert record["errors"][0]["statusCode"] == "DUPLICATE_EXTERNAL_ID"

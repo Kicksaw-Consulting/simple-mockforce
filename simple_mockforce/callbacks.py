@@ -175,6 +175,7 @@ def bulk_result_callback(request):
     operation = job["operation"]
     data = virtual_salesforce.batch_data[batch_id]
 
+    duplicate_ids = set()
     sfdc_ids = list()
     for sobject in data:
         if operation == "upsert":
@@ -185,6 +186,8 @@ def bulk_result_callback(request):
                 sobject,
                 external_field_id,
             )
+            if id_ in sfdc_ids:
+                duplicate_ids.add(id_)
             sfdc_ids.append(id_)
         elif operation == "update":
             # TODO: we'll have to address this if we ever normalize the casing
@@ -197,16 +200,33 @@ def bulk_result_callback(request):
         else:
             raise AssertionError(f"Invalid operation: {operation}")
 
-    fake_response = [
-        {
-            "success": True,
-            "created": True,
-            # yep, Salesforce returns the id lowercased in bulk responses
-            "id": id_,
-            "errors": [],
-        }
-        for id_ in sfdc_ids
-    ]
+    fake_response = list()
+    for id_ in sfdc_ids:
+        if id_ in duplicate_ids:
+            fake_response.append(
+                {
+                    "success": False,
+                    "created": False,
+                    # yep, Salesforce returns the id lowercased in bulk responses
+                    "id": id_,
+                    "errors": [
+                        {
+                            "message": "A user-specified external ID matches more than one record during an upsert.",
+                            "statusCode": "DUPLICATE_EXTERNAL_ID",
+                        }
+                    ],
+                }
+            )
+        else:
+            fake_response.append(
+                {
+                    "success": True,
+                    "created": True,
+                    # yep, Salesforce returns the id lowercased in bulk responses
+                    "id": id_,
+                    "errors": [],
+                }
+            )
 
     return (
         201,
