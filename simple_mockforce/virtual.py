@@ -149,6 +149,11 @@ class VirtualSalesforce:
             record_id,
         )
 
+        # if this is a single object upsert, SFDC doesn't let you push the upsert key's value
+        # up with the JSON. To mimic the server behavior, we need to explicitly add it here
+        # even if it's not in the payload
+        sobject[upsert_key] = record_id
+
         if index is None:
             return self.create(sobject_name, sobject)
         else:

@@ -55,7 +55,7 @@ def test_crud_lifecycle_with_custom_id():
 
     result = salesforce.Contact.upsert(
         f"{custom_id_field}/{custom_id}",
-        {"LastName": "Doe", f"{custom_id_field}": f"{custom_id}"},
+        {"LastName": "Doe"},
     )
 
     assert result == 204
@@ -68,7 +68,7 @@ def test_crud_lifecycle_with_custom_id():
 
     result = salesforce.Contact.upsert(
         f"{custom_id_field}/{custom_id}",
-        {"LastName": "Smith", f"{custom_id_field}": f"{custom_id}"},
+        {"LastName": "Smith"},
     )
 
     result = salesforce.Contact.get_by_custom_id(custom_id_field, custom_id)
