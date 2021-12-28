@@ -92,9 +92,12 @@ def _evaluate_condition(
     date_token = parse_date_token(value)
     if date_value and not date_token:
         field_value = date_value
-    if date_value and date_token:
+    elif date_value and date_token:
         field_value = date_token.truncate_date(date_value)
         value = date_token.date_token_date
+    # if our value isn't a date, but we have a date token, time to leave
+    elif date_token:
+        return False
 
     # check if we're comparing None to a date
     if not field_value and isinstance(value, datetime.date):
