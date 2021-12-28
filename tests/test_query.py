@@ -417,3 +417,9 @@ def test_where_query_with_complex_date_tokens(monkeypatch):
     assert len(records) == 1
     record = records[0]
     assert record["Name"] == "Jim Doe"
+
+    results = salesforce.query(f"SELECT Name FROM Lead WHERE DOB__c < THIS_MONTH")
+    records = results["records"]
+    assert len(records) == 1
+    record = records[0]
+    assert record["Name"] == "Jane Doe"
