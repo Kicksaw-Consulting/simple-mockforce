@@ -92,7 +92,7 @@ def _evaluate_condition(
     date_token = parse_date_token(value)
     if date_value and not date_token:
         field_value = date_value
-    if date_token and date_token:
+    if date_value and date_token:
         field_value = date_token.truncate_date(date_value)
         value = date_token.date_token_date
 
