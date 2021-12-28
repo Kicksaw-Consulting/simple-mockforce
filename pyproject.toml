@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "simple-mockforce"
-version = "0.1.13"
+version = "0.1.14"
 description = "A companion package for simple-salesforce that enables the testing of code that interacts with Salesforce's API"
 license = "MIT"
 readme = "README.md"
