@@ -2,6 +2,8 @@ import datetime
 
 import pytest
 
+from dateutil.relativedelta import relativedelta
+
 from python_soql_parser.tokens import TODAY, TOMORROW, YESTERDAY
 
 from simple_mockforce import mock_salesforce
@@ -372,3 +374,46 @@ def test_where_query_with_dates(monkeypatch):
     assert len(records) == 1
     record = records[0]
     assert record["Name"] == "Robert Trujillo"
+
+
+@mock_salesforce(fresh=True)
+def test_where_query_with_complex_date_tokens(monkeypatch):
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    salesforce.bulk.Lead.insert(
+        [
+            {
+                "Name": "John Doe",
+                "Title": "Person",
+                "DOB__c": datetime.date.today().isoformat(),
+            },
+            {
+                "Name": "Jane Doe",
+                "Title": "Person",
+                "DOB__c": (datetime.date.today() - relativedelta(months=1)).isoformat(),
+            },
+            {
+                "Name": "Jim Doe",
+                "Title": "Person",
+                "DOB__c": (datetime.date.today() + relativedelta(months=1)).isoformat(),
+            },
+        ]
+    )
+
+    results = salesforce.query(f"SELECT Name FROM Lead WHERE DOB__c = THIS_MONTH")
+    records = results["records"]
+    assert len(records) == 1
+    record = records[0]
+    assert record["Name"] == "John Doe"
+
+    results = salesforce.query(f"SELECT Name FROM Lead WHERE DOB__c = LAST_MONTH")
+    records = results["records"]
+    assert len(records) == 1
+    record = records[0]
+    assert record["Name"] == "Jane Doe"
+
+    results = salesforce.query(f"SELECT Name FROM Lead WHERE DOB__c = NEXT_MONTH")
+    records = results["records"]
+    assert len(records) == 1
+    record = records[0]
+    assert record["Name"] == "Jim Doe"
