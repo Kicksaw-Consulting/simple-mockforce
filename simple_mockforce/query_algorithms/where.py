@@ -4,9 +4,20 @@ import datetime
 from datetime import date
 from typing import List, Tuple, Union
 
+from dateutil.relativedelta import relativedelta
+
 from python_soql_parser.binops import EQ, NEQ, LT, LTE, GT, GTE
 from python_soql_parser.core import AND, OR, IN, NULL, TRUE, FALSE
-from python_soql_parser.tokens import TODAY, TOMORROW, YESTERDAY
+from python_soql_parser.tokens import (
+    TODAY,
+    TOMORROW,
+    YESTERDAY,
+    THIS_MONTH,
+    NEXT_MONTH,
+    LAST_MONTH,
+)
+
+from simple_mockforce.query_algorithms.date_token import SalesforceDateToken
 
 
 def filter_by_where_clause(sobject: dict, where: list) -> bool:
@@ -64,6 +75,12 @@ def parse_date(value: str):
         return None
 
 
+def parse_date_token(value):
+    if isinstance(value, SalesforceDateToken):
+        return value
+    return None
+
+
 def _evaluate_condition(
     sobject: dict, field: str, binop: str, value: Union[str, List[str]]
 ):
@@ -72,8 +89,12 @@ def _evaluate_condition(
     field_value = sobject[field]
 
     date_value = parse_date(field_value)
-    if date_value:
+    date_token = parse_date_token(value)
+    if date_value and not date_token:
         field_value = date_value
+    if date_token and date_token:
+        field_value = date_token.truncate_date(date_value)
+        value = date_token.date_token_date
 
     # check if we're comparing None to a date
     if not field_value and isinstance(value, datetime.date):
@@ -135,4 +156,21 @@ def _to_python(value: Union[str, list]):
         return date.today()
     elif value == TOMORROW:
         return date.today() + datetime.timedelta(days=1)
+    elif value == THIS_MONTH:
+        today = date.today()
+        return SalesforceDateToken(
+            date(today.year, month=today.month, day=1), SalesforceDateToken.MONTH
+        )
+    elif value == NEXT_MONTH:
+        day_next_month = date.today() + relativedelta(months=1)
+        return SalesforceDateToken(
+            date(day_next_month.year, month=day_next_month.month, day=1),
+            SalesforceDateToken.MONTH,
+        )
+    elif value == LAST_MONTH:
+        day_last_month = date.today() - relativedelta(months=1)
+        return SalesforceDateToken(
+            date(day_last_month.year, month=day_last_month.month, day=1),
+            SalesforceDateToken.MONTH,
+        )
     return value
