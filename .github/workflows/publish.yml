@@ -24,6 +24,8 @@ jobs:
       - name: Pytest
         run: |
           poetry run pytest
+        env:
+          MOCKFORCE_RELATIONS_ROOT: tests
       - name: Publish
         env:
           PYPI_USER: Kicksaw
@@ -38,3 +40,4 @@ jobs:
           notify_when: "failure"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          STAGE: " "
