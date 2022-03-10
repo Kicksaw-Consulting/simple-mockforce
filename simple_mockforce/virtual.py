@@ -242,6 +242,15 @@ class VirtualSalesforce:
                         related_object_name, external_id, external_id_field
                     )
                     normalized[relational_field_name] = related_object["Id"]
+            # this may be a standard, Salesforce relation, such as "Order": {"OrderId__c": order_id}, on OrderItem
+            elif type(value) == dict:
+                related_object_name = key
+                for external_id_field, external_id in value.items():
+                    related_object = self.get_by_custom_id(
+                        related_object_name, external_id, external_id_field
+                    )
+                    # and in the above case, the lookup field is OrderId
+                    normalized[f"{related_object_name}Id"] = related_object["Id"]
             else:
                 normalized[key] = value
         return normalized
