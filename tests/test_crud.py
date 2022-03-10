@@ -171,3 +171,41 @@ def test_crud_error_handling():
         failed = True
 
     assert failed
+
+
+@mock_salesforce
+def test_crud_lifecycle_with_custom_id_and_built_in_foreign_key():
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    parent_custom_id = "xyz"
+    parent_custom_id_field = "OrderId__c"
+
+    child_custom_id = "123-abc"
+    child_custom_id_field = "OrderId__c"
+
+    response = salesforce.Order.create(
+        {"Name": "I'm Custom", parent_custom_id_field: parent_custom_id}
+    )
+    order_id = response["id"]
+
+    result = salesforce.OrderItem.upsert(
+        f"{child_custom_id_field}/{child_custom_id}",
+        {
+            "FirstName": "Seymour",
+            "LastName": "Butz",
+            f"{child_custom_id_field}": f"{child_custom_id}",
+            "Order": {parent_custom_id_field: parent_custom_id},
+        },
+    )
+
+    assert result == 204
+
+    result = salesforce.OrderItem.get_by_custom_id(
+        child_custom_id_field, child_custom_id
+    )
+
+    assert result["Id"]
+    assert result[child_custom_id_field] == child_custom_id
+    assert result["FirstName"] == "Seymour"
+    assert result["LastName"] == "Butz"
+    assert result["OrderId"] == order_id
