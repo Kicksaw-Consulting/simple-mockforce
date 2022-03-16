@@ -93,7 +93,7 @@ Notable mentions:
 
 Error handling is only mocked to a degree, and for some calls it isn't at all.
 This is because the virtual Salesforce organization does not yet enforce any of
-the server-side validation when working with a real API.
+the server-side validation you might encounter when working with the real API.
 
 This means that the virtual organization is much more permissive and loose than a
 real Salesforce organization would be.
