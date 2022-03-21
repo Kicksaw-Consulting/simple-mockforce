@@ -209,3 +209,37 @@ def test_crud_lifecycle_with_custom_id_and_built_in_foreign_key():
     assert result["FirstName"] == "Seymour"
     assert result["LastName"] == "Butz"
     assert result["OrderId"] == order_id
+
+
+@mock_salesforce
+def test_crud_lifecycle_with_custom_id_and_built_in_foreign_key_with_funny_field_name():
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    parent_custom_id = "abc"
+    parent_custom_id_field = "ParentCustomId__c"
+
+    child_custom_id = "123xyz"
+    child_custom_id_field = "ChildCustomId__c"
+
+    response = salesforce.Account.create(
+        {"Name": "I'm Custom", parent_custom_id_field: parent_custom_id}
+    )
+    parent_id = response["id"]
+
+    result = salesforce.Account.upsert(
+        f"{child_custom_id_field}/{child_custom_id}",
+        {
+            "Name": "Custom child",
+            f"{child_custom_id_field}": f"{child_custom_id}",
+            "Parent": {parent_custom_id_field: parent_custom_id},
+        },
+    )
+
+    assert result == 204
+
+    result = salesforce.Account.get_by_custom_id(child_custom_id_field, child_custom_id)
+
+    assert result["Id"]
+    assert result[child_custom_id_field] == child_custom_id
+    assert result["Name"] == "Custom child"
+    assert result["ParentId"] == parent_id

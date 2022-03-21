@@ -244,13 +244,22 @@ class VirtualSalesforce:
                     normalized[relational_field_name] = related_object["Id"]
             # this may be a standard, Salesforce relation, such as "Order": {"OrderId__c": order_id}, on OrderItem
             elif type(value) == dict:
-                related_object_name = key
+                # check if we're not using a real sobject name,
+                # and instead need to refer to the relations.json file for cases
+                # where an sobject name can't be derived from a look up's field name
+                if key not in self.data:
+                    related_object_name = self.relations_file[key]
+                    lookup_field_prefix = key
+                else:
+                    related_object_name = key
+                    lookup_field_prefix = key
+
                 for external_id_field, external_id in value.items():
                     related_object = self.get_by_custom_id(
                         related_object_name, external_id, external_id_field
                     )
                     # and in the above case, the lookup field is OrderId
-                    normalized[f"{related_object_name}Id"] = related_object["Id"]
+                    normalized[f"{lookup_field_prefix}Id"] = related_object["Id"]
             else:
                 normalized[key] = value
         return normalized
