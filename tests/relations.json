@@ -1,3 +1,4 @@
 {
-  "Company__r": "Account"
+  "Company__r": "Account",
+  "Parent": "Account"
 }
