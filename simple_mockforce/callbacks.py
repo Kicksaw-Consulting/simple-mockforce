@@ -84,12 +84,21 @@ def update_callback(request):
                 json.dumps([{"errorCode": NOT_FOUND}]),
             )
     else:
-        virtual_salesforce.upsert(sobject, record_id, body, upsert_key=upsert_key)
+        salesforce_id, created = virtual_salesforce.upsert(
+            sobject, record_id, body, upsert_key=upsert_key
+        )
+        return (
+            204,
+            {},
+            json.dumps(
+                {"id": salesforce_id, "success": True, "errors": [], "created": created}
+            ),
+        )
 
     return (
         204,
         {},
-        json.dumps({}),
+        b"",
     )
 
 
@@ -111,7 +120,7 @@ def delete_callback(request):
     return (
         204,
         {},
-        json.dumps({}),
+        b"",
     )
 
 
@@ -175,17 +184,20 @@ def bulk_result_callback(request):
     operation = job["operation"]
     data = virtual_salesforce.batch_data[batch_id]
 
+    id_to_created = dict()
+
     duplicate_ids = set()
     sfdc_ids = list()
     for sobject in data:
         if operation == "upsert":
             external_field_id = job["externalIdFieldName"]
-            id_ = virtual_salesforce.upsert(
+            id_, created = virtual_salesforce.upsert(
                 sobject_name,
                 sobject[external_field_id],
                 sobject,
                 external_field_id,
             )
+            id_to_created[id_] = created
             if id_ in sfdc_ids:
                 duplicate_ids.add(id_)
             sfdc_ids.append(id_)
@@ -221,7 +233,7 @@ def bulk_result_callback(request):
             fake_response.append(
                 {
                     "success": True,
-                    "created": True,
+                    "created": id_to_created.get(id_, True),
                     # yep, Salesforce returns the id lowercased in bulk responses
                     "id": id_,
                     "errors": [],

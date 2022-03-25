@@ -155,11 +155,11 @@ class VirtualSalesforce:
         sobject[upsert_key] = record_id
 
         if index is None:
-            return self.create(sobject_name, sobject)
+            return self.create(sobject_name, sobject), True
         else:
             sfdc_id = self.data[sobject_name][index]["Id"]
             self.update(sobject_name, sfdc_id, sobject)
-            return sfdc_id
+            return sfdc_id, False
 
     def create(self, sobject_name: str, sobject: dict):
         id_ = self._generate_sfdc_id()

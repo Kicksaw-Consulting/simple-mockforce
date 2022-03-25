@@ -47,6 +47,61 @@ def test_crud_lifecycle():
 
 
 @mock_salesforce
+def test_crud_lifecycle_with_raw_response():
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    result = salesforce.Contact.create({"FirstName": "John", "LastName": "Doe"})
+
+    record_id = result["id"]
+
+    assert record_id
+    assert result["success"] == True
+    assert result["errors"] == []
+
+    result = salesforce.Contact.get(record_id)
+
+    assert result["Id"] == record_id
+    assert result["FirstName"] == "John"
+    assert result["LastName"] == "Doe"
+
+    result = salesforce.Contact.update(
+        record_id, {"LastName": "Smith", "External_ID__c": "123"}, raw_response=True
+    )
+
+    assert result.status_code == 204
+
+    result = salesforce.Contact.upsert(
+        f"External_ID__c/123", {"LastName": "Smith"}, raw_response=True
+    )
+
+    assert result.status_code == 204
+    assert result.json() == {
+        "id": record_id,
+        "success": True,
+        "errors": [],
+        "created": False,
+    }
+
+    result = salesforce.Contact.get(record_id)
+
+    assert result["Id"] == record_id
+    assert result["FirstName"] == "John"
+    assert result["LastName"] == "Smith"
+
+    result = salesforce.Contact.delete(record_id, raw_response=True)
+
+    assert result.status_code == 204
+
+    failed = False
+    try:
+        result = salesforce.Contact.get(record_id)
+    except SalesforceResourceNotFound:
+        failed = True
+
+    assert failed
+
+
+@mock_salesforce
 def test_crud_lifecycle_with_custom_id():
     salesforce = Salesforce(**MOCK_CREDS)
 
