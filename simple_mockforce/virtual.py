@@ -8,6 +8,7 @@ from pathlib import Path
 
 from python_soql_parser import parse
 
+from simple_salesforce.exceptions import SalesforceResourceNotFound
 from simple_mockforce.query_algorithms import (
     add_parent_object_attributes,
     filter_by_where_clause,
@@ -128,7 +129,19 @@ class VirtualSalesforce:
                 return sobject
         raise AssertionError(f"Could not find {record_id} in {sobject_name}s")
 
-    def update(self, sobject_name: str, record_id: str, data: dict):
+    def update(self, sobject_name: str, record_id: str, data: dict, url: str = None):
+        if sobject_name not in self.data:
+            raise SalesforceResourceNotFound(
+                url,
+                404,
+                sobject_name,
+                [
+                    {
+                        "errorCode": "NOT_FOUND",
+                        "message": "The requested resource does not exist",
+                    }
+                ],
+            )
         original, index = find_object_and_index(
             self.data[sobject_name],
             "Id",
@@ -170,7 +183,19 @@ class VirtualSalesforce:
         self.data[sobject_name].append(sobject)
         return id_
 
-    def delete(self, sobject_name: str, record_id: str):
+    def delete(self, sobject_name: str, record_id: str, url: str = None):
+        if sobject_name not in self.data:
+            raise SalesforceResourceNotFound(
+                url,
+                404,
+                sobject_name,
+                [
+                    {
+                        "errorCode": "NOT_FOUND",
+                        "message": "The requested resource does not exist",
+                    }
+                ],
+            )
         index = None
         for idx, object_ in enumerate(self.data[sobject_name]):
             if object_["Id"] == record_id:
