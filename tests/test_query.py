@@ -14,7 +14,7 @@ from tests.utils import MOCK_CREDS
 import simple_mockforce.query_algorithms.where as where_module
 
 
-@mock_salesforce(fresh=True)
+@mock_salesforce
 def test_basic_query():
     salesforce = Salesforce(**MOCK_CREDS)
 
@@ -29,7 +29,7 @@ def test_basic_query():
     assert record["Name"] == "Ozzy Osbourne"
 
 
-@mock_salesforce(fresh=True)
+@mock_salesforce
 def test_where_basic_query():
     salesforce = Salesforce(**MOCK_CREDS)
 
@@ -56,7 +56,7 @@ def test_where_basic_query():
     assert record["Title"] == "CDO"
 
 
-@mock_salesforce(fresh=True)
+@mock_salesforce
 def test_where_bool_query():
     salesforce = Salesforce(**MOCK_CREDS)
 
@@ -107,7 +107,7 @@ def test_where_bool_query():
         (">=", 999, 0),
     ],
 )
-@mock_salesforce(fresh=True)
+@mock_salesforce
 def test_where_comparison_query(operator, number, expected):
     salesforce = Salesforce(**MOCK_CREDS)
 
@@ -136,7 +136,7 @@ def test_where_comparison_query(operator, number, expected):
         assert record["Human_Score__c"] == 100
 
 
-@mock_salesforce(fresh=True)
+@mock_salesforce
 def test_where_complex_query():
     salesforce = Salesforce(**MOCK_CREDS)
 
@@ -190,7 +190,7 @@ def test_where_complex_query():
     assert record["Id"] == tarantino_id
 
 
-@mock_salesforce(fresh=True)
+@mock_salesforce
 def test_order_by_query():
     salesforce = Salesforce(**MOCK_CREDS)
 
@@ -245,7 +245,7 @@ def test_order_by_query():
     assert record4["Name"] == "Facebook"
 
 
-@mock_salesforce(fresh=True)
+@mock_salesforce
 def test_query_with_parent_object_attribute():
     salesforce = Salesforce(**MOCK_CREDS)
 
@@ -276,7 +276,7 @@ def test_query_with_parent_object_attribute():
     assert record["Account"]["Name"] == "Google"
 
 
-@mock_salesforce(fresh=True)
+@mock_salesforce
 def test_query_with_custom_parent_object_attribute():
     salesforce = Salesforce(**MOCK_CREDS)
 
@@ -316,7 +316,7 @@ class DayAfterLarsDOB:
         return datetime.date(1963, 12, 27)
 
 
-@mock_salesforce(fresh=True)
+@mock_salesforce
 def test_where_query_with_dates(monkeypatch):
     salesforce = Salesforce(**MOCK_CREDS)
 
@@ -376,8 +376,8 @@ def test_where_query_with_dates(monkeypatch):
     assert record["Name"] == "Robert Trujillo"
 
 
-@mock_salesforce(fresh=True)
-def test_where_query_with_complex_date_tokens(monkeypatch):
+@mock_salesforce
+def test_where_query_with_complex_date_tokens():
     salesforce = Salesforce(**MOCK_CREDS)
 
     salesforce.bulk.Lead.insert(
