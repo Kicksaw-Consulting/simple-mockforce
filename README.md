@@ -43,7 +43,7 @@ def test_api():
     assert account["Name"] == "Test Account"
 ```
 
-To reset state, you can pass `fresh=True`,
+To reset state, you can pass ``,
 ensuring there's no pollution between tests
 
 ```python
@@ -51,7 +51,7 @@ from simple_mockforce.virtual import virtual_salesforce
 
 
 # This will wipe away the account created in the above step
-@mock_salesforce(fresh=True)
+@mock_salesforce
 def test_api_again():
     pass
 ```

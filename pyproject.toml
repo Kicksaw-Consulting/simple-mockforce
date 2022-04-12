@@ -14,9 +14,9 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.8"
 python-soql-parser = "^0.1.0"
-responses = "^0.13.2"
-decorator = "^5.0.7"
 python-dateutil = "^2.8.2"
+responses = "^0.20.0"
+decorator = "^5.1.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

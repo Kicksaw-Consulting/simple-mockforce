@@ -5,7 +5,7 @@ from simple_mockforce import mock_salesforce
 from tests.utils import MOCK_CREDS
 
 
-@mock_salesforce(fresh=True)
+@mock_salesforce
 def test_bulk_lifecycle():
     salesforce = Salesforce(**MOCK_CREDS)
 
@@ -176,7 +176,7 @@ def test_bulk_upsert_with_weird_relation():
     assert deal[deal_id_field] == deal_id_value
 
 
-@mock_salesforce(fresh=True)
+@mock_salesforce
 def test_bulk_upsert_with_duplicate_items_in_batch():
     salesforce = Salesforce(**MOCK_CREDS)
 
