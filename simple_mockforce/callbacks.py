@@ -76,7 +76,7 @@ def update_callback(request):
 
     if not upsert_key:
         try:
-            virtual_salesforce.update(sobject, record_id, body)
+            virtual_salesforce.update(sobject, record_id, body, url)
         except AssertionError:
             return (
                 404,
