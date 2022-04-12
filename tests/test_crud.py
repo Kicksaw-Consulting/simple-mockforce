@@ -214,16 +214,18 @@ def test_crud_error_handling():
     failed = False
     try:
         salesforce.Contact.update("512", {"Name": "idk"})
-    except SalesforceResourceNotFound:
+    except SalesforceResourceNotFound as reason:
         failed = True
+        assert reason.status == 404
 
     assert failed
 
     failed = False
     try:
         salesforce.Contact.delete("512")
-    except SalesforceResourceNotFound:
+    except SalesforceResourceNotFound as reason:
         failed = True
+        assert reason.status == 404
 
     assert failed
 

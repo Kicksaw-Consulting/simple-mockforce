@@ -130,18 +130,7 @@ class VirtualSalesforce:
         raise AssertionError(f"Could not find {record_id} in {sobject_name}s")
 
     def update(self, sobject_name: str, record_id: str, data: dict, url: str = None):
-        if sobject_name not in self.data:
-            raise SalesforceResourceNotFound(
-                url,
-                404,
-                sobject_name,
-                [
-                    {
-                        "errorCode": "NOT_FOUND",
-                        "message": "The requested resource does not exist",
-                    }
-                ],
-            )
+        self._check_for_salesforce_resource(url, sobject_name)
         original, index = find_object_and_index(
             self.data[sobject_name],
             "Id",
@@ -184,18 +173,7 @@ class VirtualSalesforce:
         return id_
 
     def delete(self, sobject_name: str, record_id: str, url: str = None):
-        if sobject_name not in self.data:
-            raise SalesforceResourceNotFound(
-                url,
-                404,
-                sobject_name,
-                [
-                    {
-                        "errorCode": "NOT_FOUND",
-                        "message": "The requested resource does not exist",
-                    }
-                ],
-            )
+        self._check_for_salesforce_resource(url, sobject_name)
         index = None
         for idx, object_ in enumerate(self.data[sobject_name]):
             if object_["Id"] == record_id:
@@ -305,6 +283,20 @@ class VirtualSalesforce:
     @staticmethod
     def _generate_sfdc_id():
         return "".join(random.choices(string.ascii_letters + string.digits, k=18))
+
+    def _check_for_salesforce_resource(self, url: str, sobject_name: str):
+        if sobject_name not in self.data:
+            raise SalesforceResourceNotFound(
+                url,
+                404,
+                sobject_name,
+                [
+                    {
+                        "errorCode": "NOT_FOUND",
+                        "message": "The requested resource does not exist",
+                    }
+                ],
+            )
 
 
 virtual_salesforce = VirtualSalesforce()
