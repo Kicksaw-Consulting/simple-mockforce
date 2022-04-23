@@ -21,13 +21,14 @@ def test_crud_lifecycle():
 
     result = salesforce.Contact.get(record_id)
 
-    creation_time = datetime.datetime.now().isoformat()
+    # shave off the last few milliseconds lol
+    creation_time = datetime.datetime.now().isoformat()[:-4]
 
     assert result["Id"] == record_id
     assert result["FirstName"] == "John"
     assert result["LastName"] == "Doe"
-    assert result["CreatedDate"] == creation_time
-    assert result["LastModifiedDate"] == creation_time
+    assert result["CreatedDate"][:-4] == creation_time
+    assert result["LastModifiedDate"][:-4] == creation_time
 
     result = salesforce.Contact.update(record_id, {"LastName": "Smith"})
 
@@ -38,8 +39,8 @@ def test_crud_lifecycle():
     assert result["Id"] == record_id
     assert result["FirstName"] == "John"
     assert result["LastName"] == "Smith"
-    assert result["CreatedDate"] == creation_time
-    assert result["LastModifiedDate"] == datetime.datetime.now().isoformat()
+    assert result["CreatedDate"][:-4] == creation_time
+    assert result["LastModifiedDate"][:-4] == datetime.datetime.now().isoformat()[:-4]
 
     result = salesforce.Contact.delete(record_id)
 
