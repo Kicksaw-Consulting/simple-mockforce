@@ -1,4 +1,5 @@
 # TODO: determine if provisioning should be implicit like it is now, or if it should be explicitly done
+import datetime
 import json
 import os
 import random
@@ -138,6 +139,7 @@ class VirtualSalesforce:
         )
         assert index is not None, f"Could not find {record_id} in {sobject_name}s"
         sobject = self._normalize_relation_via_external_id_field(data)
+        sobject["LastModifiedDate"] = datetime.datetime.now().isoformat()
         self.data[sobject_name][index] = {
             **original,
             **sobject,
@@ -167,6 +169,8 @@ class VirtualSalesforce:
         id_ = self._generate_sfdc_id()
         sobject["Id"] = id_
         sobject = self._normalize_relation_via_external_id_field(sobject)
+        sobject["CreatedDate"] = datetime.datetime.now().isoformat()
+        sobject["LastModifiedDate"] = datetime.datetime.now().isoformat()
 
         self._provision_sobject(sobject_name)
         self.data[sobject_name].append(sobject)

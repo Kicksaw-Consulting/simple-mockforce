@@ -1,3 +1,5 @@
+import datetime
+
 from simple_mockforce import mock_salesforce
 from simple_salesforce import Salesforce
 from simple_salesforce.exceptions import SalesforceResourceNotFound
@@ -19,9 +21,13 @@ def test_crud_lifecycle():
 
     result = salesforce.Contact.get(record_id)
 
+    creation_time = datetime.datetime.now().isoformat()
+
     assert result["Id"] == record_id
     assert result["FirstName"] == "John"
     assert result["LastName"] == "Doe"
+    assert result["CreatedDate"] == creation_time
+    assert result["LastModifiedDate"] == creation_time
 
     result = salesforce.Contact.update(record_id, {"LastName": "Smith"})
 
@@ -32,6 +38,8 @@ def test_crud_lifecycle():
     assert result["Id"] == record_id
     assert result["FirstName"] == "John"
     assert result["LastName"] == "Smith"
+    assert result["CreatedDate"] == creation_time
+    assert result["LastModifiedDate"] == datetime.datetime.now().isoformat()
 
     result = salesforce.Contact.delete(record_id)
 
