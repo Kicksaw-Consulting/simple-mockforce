@@ -250,7 +250,8 @@ class VirtualSalesforce:
                     )
                     normalized[relational_field_name] = related_object["Id"]
             # this may be a standard, Salesforce relation, such as "Order": {"OrderId__c": order_id}, on OrderItem
-            elif type(value) == dict:
+            # BillingAddress is a built-in Salesforce field that comes back from the API as a dictionary
+            elif type(value) == dict and key != "BillingAddress":
                 # check if we're not using a real sobject name,
                 # and instead need to refer to the relations.json file for cases
                 # where an sobject name can't be derived from a look up's field name
