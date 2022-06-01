@@ -60,13 +60,16 @@ def test_where_basic_query():
 def test_where_bool_query():
     salesforce = Salesforce(**MOCK_CREDS)
 
-    response = salesforce.Opportunity.create({"Name": "Opp 1", "IsDeleted": True})
+    response = salesforce.Opportunity.create({"Name": "Opp 1"})
     deleted_opp_id = response["id"]
-    response = salesforce.Opportunity.create({"Name": "Opp 2", "IsDeleted": False})
+    salesforce.Opportunity.delete(deleted_opp_id)
+
+    response = salesforce.Opportunity.create({"Name": "Opp 2"})
     active_opp_id = response["id"]
 
     results = salesforce.query(
-        f"SELECT Id, Name, IsDeleted FROM Opportunity WHERE IsDeleted = true"
+        f"SELECT Id, Name, IsDeleted FROM Opportunity WHERE IsDeleted = true",
+        include_deleted=True
     )
     records = results["records"]
     assert len(records) == 1
@@ -76,7 +79,8 @@ def test_where_bool_query():
     assert deleted_record["IsDeleted"]
 
     results = salesforce.query(
-        f"SELECT Id, Name, IsDeleted FROM Opportunity WHERE IsDeleted = false"
+        f"SELECT Id, Name, IsDeleted FROM Opportunity WHERE IsDeleted = false",
+        include_deleted=True
     )
     records = results["records"]
     assert len(records) == 1
@@ -87,7 +91,7 @@ def test_where_bool_query():
 
     results = salesforce.query(f"SELECT Id FROM Opportunity")
     records = results["records"]
-    assert len(records) == 2
+    assert len(records) == 1
 
 
 @pytest.mark.parametrize(
@@ -423,3 +427,35 @@ def test_where_query_with_complex_date_tokens():
     assert len(records) == 1
     record = records[0]
     assert record["Name"] == "Jane Doe"
+
+
+@mock_salesforce
+def test_query_included_deleted_false():
+    salesforce = Salesforce(**MOCK_CREDS)
+    salesforce.Account.create({"Name": "Mark"})
+    accounts_to_delete = [salesforce.Account.create({"Name": str(i)}) for i in range(5)]
+    for account in accounts_to_delete:
+        salesforce.Account.delete(account["id"])
+
+    result = salesforce.query("SELECT Name FROM ACCOUNT", include_deleted=False)
+    records = result["records"]
+    assert len(records) == 1
+    assert records[0]["Name"] == "Mark"
+
+
+@mock_salesforce
+def test_query_included_deleted_true():
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    account = salesforce.Account.create({"Name": "Mark"})
+    accounts_to_delete = [salesforce.Account.create({"Name": i}) for i in range(5)]
+    accounts_ids_to_delete = [account["id"] for account in accounts_to_delete]
+    for id_ in accounts_ids_to_delete:
+        salesforce.Account.delete(id_)
+    account_ids = [account["id"], *accounts_ids_to_delete]
+
+    result = salesforce.query("SELECT Id, Name FROM ACCOUNT", include_deleted=True)
+    records = result["records"]
+    records_ids = [record["Id"] for record in records]
+    assert len(records) == 6
+    assert records_ids == account_ids

@@ -4,6 +4,7 @@ import json
 import os
 import random
 import string
+from collections import defaultdict
 
 from pathlib import Path
 
@@ -49,14 +50,14 @@ class VirtualSalesforce:
         """
         Starts a virtual Salesforce instance from scratch. Useful to prevent test pollution
         """
-        self.data = dict()
+        self.data = defaultdict(list)
         self.jobs = dict()
         self.batches = dict()
         self.batch_data = dict()
 
     # SOQL
 
-    def query(self, soql: str):
+    def query(self, soql: str, include_deleted: bool = False):
         logger.warning(
             "Mocking 'query' is not yet fully supported. You should watch your tests closely if you're using this feature."
         )
@@ -91,7 +92,7 @@ class VirtualSalesforce:
         order_by = (
             parse_results["order_by"].asList() if "order_by" in parse_results else None
         )
-        sobjects = self.get_sobjects(sobject)
+        sobjects = self.get_sobjects(sobject, include_deleted=include_deleted)
 
         records = list()
 
@@ -119,36 +120,37 @@ class VirtualSalesforce:
     # CRUD
 
     def get(self, sobject_name: str, record_id: str):
-        for sobject in self.data[sobject_name]:
+        for sobject in self.get_sobjects(sobject_name):
             if sobject["Id"] == record_id:
                 return sobject
         raise AssertionError(f"Could not find {record_id} in {sobject_name}s")
 
     def get_by_custom_id(self, sobject_name: str, record_id: str, custom_id_field: str):
-        for sobject in self.data[sobject_name]:
+        for sobject in self.get_sobjects(sobject_name):
             if sobject.get(custom_id_field) == record_id:
                 return sobject
         raise AssertionError(f"Could not find {record_id} in {sobject_name}s")
 
     def update(self, sobject_name: str, record_id: str, data: dict, url: str = None):
         self._check_for_salesforce_resource(url, sobject_name)
+        sobjects = self.get_sobjects(sobject_name)
         original, index = find_object_and_index(
-            self.data[sobject_name],
+            sobjects,
             "Id",
             record_id,
         )
         assert index is not None, f"Could not find {record_id} in {sobject_name}s"
-        sobject = self._normalize_relation_via_external_id_field(data)
-        sobject["LastModifiedDate"] = datetime.datetime.now().isoformat()
+        normalized_sobject = self._normalize_relation_via_external_id_field(data)
+        sobject = self._update_datetime_fields(normalized_sobject)
         self.data[sobject_name][index] = {
             **original,
             **sobject,
         }
 
     def upsert(self, sobject_name: str, record_id: str, sobject: dict, upsert_key: str):
-        self._provision_sobject(sobject_name)
+        sobjects = self.get_sobjects(sobject_name)
         _, index = find_object_and_index(
-            self.data[sobject_name],
+            sobjects,
             upsert_key,
             record_id,
         )
@@ -161,31 +163,28 @@ class VirtualSalesforce:
         if index is None:
             return self.create(sobject_name, sobject), True
         else:
-            sfdc_id = self.data[sobject_name][index]["Id"]
+            sfdc_id = sobjects[index]["Id"]
             self.update(sobject_name, sfdc_id, sobject)
             return sfdc_id, False
 
     def create(self, sobject_name: str, sobject: dict):
-        id_ = self._generate_sfdc_id()
-        sobject["Id"] = id_
-        sobject = self._normalize_relation_via_external_id_field(sobject)
-        sobject["CreatedDate"] = datetime.datetime.now().isoformat()
-        sobject["LastModifiedDate"] = datetime.datetime.now().isoformat()
-
-        self._provision_sobject(sobject_name)
+        normalized_sobject = self._normalize_relation_via_external_id_field(sobject)
+        sobject = self._add_system_fields(normalized_sobject)
         self.data[sobject_name].append(sobject)
-        return id_
+        return sobject["Id"]
 
     def delete(self, sobject_name: str, record_id: str, url: str = None):
         self._check_for_salesforce_resource(url, sobject_name)
         index = None
-        for idx, object_ in enumerate(self.data[sobject_name]):
+        sobjects = self.get_sobjects(sobject_name)
+        for idx, object_ in enumerate(sobjects):
             if object_["Id"] == record_id:
                 index = idx
 
         assert index is not None, f"Could not found {record_id} in {sobject_name}s"
 
-        self.data[sobject_name].pop(index)
+        sobject = sobjects[index]
+        self._mark_as_deleted(sobject)
 
     # bulk stuff
 
@@ -207,12 +206,14 @@ class VirtualSalesforce:
 
     # utils
 
-    def get_sobjects(self, sobject_name: str):
+    def get_sobjects(self, sobject_name: str, include_deleted: bool = False):
         """
         Returns the objects currently loaded into the virtual instance
         """
-        self._provision_sobject(sobject_name)
-        return self.data[sobject_name]
+        sobjects = self.data[sobject_name]
+        if include_deleted:
+            return sobjects
+        return [sobject for sobject in sobjects if not sobject["IsDeleted"]]
 
     def _normalize_relation_via_external_id_field(self, sobject: dict):
         """
@@ -276,14 +277,36 @@ class VirtualSalesforce:
     def _related_object_name_to_object_name(related_object_name: str):
         return related_object_name.replace("__r", "__c")
 
-    def _provision_sobject(self, sobject_name: str):
-        """
-        Provisions a virtual Salesfoce object
+    def _add_system_fields(self, sobject: dict) -> dict:
+        current_datetime = datetime.datetime.now().isoformat()
+        user_sfdc_id = self._generate_sfdc_id()
+        system_fields = {
+            "Id": self._generate_sfdc_id(),
+            "IsDeleted": False,
+            "CreatedById": user_sfdc_id,
+            "LastModifiedById": user_sfdc_id,
+            "LastModifiedDate": current_datetime,
+            "CreatedDate": current_datetime,
+            "SystemModstamp": current_datetime,
+        }
+        return {
+            **sobject,
+            **system_fields,
+        }
 
-        Use the word "provision" instead of "create" as to not confuse with creating an instance of an object
-        """
-        if sobject_name not in self.data:
-            self.data[sobject_name] = []
+    @staticmethod
+    def _update_datetime_fields(sobject: dict) -> dict:
+        current_datetime = datetime.datetime.now().isoformat()
+        return {
+            **sobject,
+            "SystemModstamp": current_datetime,
+            "LastModifiedDate": current_datetime,
+        }
+
+    @staticmethod
+    def _mark_as_deleted(sobject: dict):
+        sobject["IsDeleted"] = True
+        sobject["LastModifiedDate"] = datetime.datetime.now().isoformat()
 
     @staticmethod
     def _generate_sfdc_id():

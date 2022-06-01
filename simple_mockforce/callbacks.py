@@ -14,14 +14,25 @@ from simple_mockforce.virtual import virtual_salesforce
 
 
 def query_callback(request):
-    records = virtual_salesforce.query(request.params["q"])
+    records = virtual_salesforce.query(request.params["q"], include_deleted=False)
 
     body = {
         "totalSize": len(records),
         "done": True,
         "records": records,
     }
-    return (200, {}, json.dumps(body))
+    return 200, {}, json.dumps(body),
+
+
+def query_all_callback(request):
+    records = virtual_salesforce.query(request.params["q"], include_deleted=True)
+
+    body = {
+        "totalSize": len(records),
+        "done": True,
+        "records": records,
+    }
+    return 200, {}, json.dumps(body),
 
 
 def get_callback(request):

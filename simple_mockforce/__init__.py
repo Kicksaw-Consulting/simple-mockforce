@@ -13,6 +13,7 @@ from simple_mockforce.callbacks import (
     job_callback,
     job_detail_callback,
     query_callback,
+    query_all_callback,
     update_callback,
 )
 from simple_mockforce.constants import (
@@ -24,6 +25,7 @@ from simple_mockforce.constants import (
     SOAP_API_LOGIN_RESPONSE,
     DETAIL_URL,
     QUERY_URL,
+    QUERY_ALL_URL,
     JOB_URL,
     BATCH_URL,
 )
@@ -45,6 +47,12 @@ def mock_salesforce(func, *args, **kwargs):
         responses.GET,
         re.compile(QUERY_URL),
         callback=query_callback,
+        content_type="content/json",
+    )
+    responses.add_callback(
+        responses.GET,
+        re.compile(QUERY_ALL_URL),
+        callback=query_all_callback,
         content_type="content/json",
     )
     responses.add_callback(

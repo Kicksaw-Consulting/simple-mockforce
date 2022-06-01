@@ -1,58 +1,66 @@
 import datetime
 
+import pytest
+from freezegun import freeze_time
+
 from simple_mockforce import mock_salesforce
 from simple_salesforce import Salesforce
 from simple_salesforce.exceptions import SalesforceResourceNotFound
 
-from tests.utils import MOCK_CREDS
+from tests.utils import MOCK_CREDS, filter_user_fields
 
 
 @mock_salesforce
 def test_crud_lifecycle():
     salesforce = Salesforce(**MOCK_CREDS)
+    creation_time = datetime.datetime.now()
 
-    result = salesforce.Contact.create({"FirstName": "John", "LastName": "Doe"})
+    with freeze_time(creation_time):
+        created_result = salesforce.Contact.create({"FirstName": "John", "LastName": "Doe"})
 
-    record_id = result["id"]
+    contact_id = created_result["id"]
+    assert created_result == {
+        "id": contact_id,
+        "success": True,
+        "errors": [],
+    }
 
-    assert record_id
-    assert result["success"] == True
-    assert result["errors"] == []
+    created_contact = salesforce.Contact.get(contact_id)
+    created_fields = filter_user_fields(created_contact)
 
-    result = salesforce.Contact.get(record_id)
+    assert created_fields == {
+        "Id": contact_id,
+        "FirstName": "John",
+        "LastName": "Doe",
+        "CreatedDate": creation_time.isoformat(),
+        "LastModifiedDate": creation_time.isoformat(),
+        "IsDeleted": False,
+        "SystemModstamp": creation_time.isoformat(),
+        'attributes': {
+            "type": "Contact",
+            "url": f"/services/data/v42.0/sobjects/Contact/{contact_id}"
+        }
+    }
 
-    # shave off the last few milliseconds lol
-    creation_time = datetime.datetime.now().isoformat()[:-7]
+    updated_time = creation_time + datetime.timedelta(minutes=30)
+    with freeze_time(updated_time):
+        updated_result = salesforce.Contact.update(contact_id, {"LastName": "Smith"})
 
-    assert result["Id"] == record_id
-    assert result["FirstName"] == "John"
-    assert result["LastName"] == "Doe"
-    assert result["CreatedDate"][:-7] == creation_time
-    assert result["LastModifiedDate"][:-7] == creation_time
+    assert updated_result == 204
 
-    result = salesforce.Contact.update(record_id, {"LastName": "Smith"})
+    updated_contact = salesforce.Contact.get(contact_id)
 
-    assert result == 204
+    assert updated_contact["LastName"] == "Smith"
+    assert updated_contact["CreatedDate"] == creation_time.isoformat()
+    assert updated_contact["LastModifiedDate"] == updated_time.isoformat()
+    assert updated_contact["SystemModstamp"] == updated_time.isoformat()
 
-    result = salesforce.Contact.get(record_id)
+    deleted_result = salesforce.Contact.delete(contact_id)
 
-    assert result["Id"] == record_id
-    assert result["FirstName"] == "John"
-    assert result["LastName"] == "Smith"
-    assert result["CreatedDate"][:-7] == creation_time
-    assert result["LastModifiedDate"][:-7] == datetime.datetime.now().isoformat()[:-7]
+    assert deleted_result == 204
 
-    result = salesforce.Contact.delete(record_id)
-
-    assert result == 204
-
-    failed = False
-    try:
-        result = salesforce.Contact.get(record_id)
-    except SalesforceResourceNotFound:
-        failed = True
-
-    assert failed
+    with pytest.raises(SalesforceResourceNotFound):
+        salesforce.Contact.get(contact_id)
 
 
 @mock_salesforce
