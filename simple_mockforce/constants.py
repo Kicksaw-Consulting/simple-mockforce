@@ -7,6 +7,7 @@ SFDC_ID = "[a-zA-Z0-9]+"
 
 # CRUD and query stuff
 QUERY_URL = f"{BASE_URL}/services/data/v{SF_VERSION}/query/"
+QUERY_ALL_URL = f"{BASE_URL}/services/data/v{SF_VERSION}/queryAll/"
 DETAIL_URL = f"{BASE_URL}/services/data/v{SF_VERSION}/sobjects/{SOBJECT}/{SFDC_ID}"
 CREATE_URL = f"{BASE_URL}/services/data/v{SF_VERSION}/sobjects/{SOBJECT}/"
 
