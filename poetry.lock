@@ -204,7 +204,7 @@ six = ">=1.5"
 
 [[package]]
 name = "python-soql-parser"
-version = "0.1.10"
+version = "0.1.11"
 description = "A pyparsing-based library for parsing SOQL statements"
 category = "main"
 optional = false
@@ -290,7 +290,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "a7fa83c40279d670a2be8900e2ea267fac895108e5ad99cce8749db100b833a1"
+content-hash = "615ee3174d2c44a509cc58546011db523270003ff297ab8f907865ed2477e90b"
 
 [metadata.files]
 atomicwrites = [
@@ -429,8 +429,8 @@ python-dateutil = [
     {file = "python_dateutil-2.8.2-py2.py3-none-any.whl", hash = "sha256:961d03dc3453ebbc59dbdea9e4e11c5651520a876d0f4db161e8674aae935da9"},
 ]
 python-soql-parser = [
-    {file = "python-soql-parser-0.1.10.tar.gz", hash = "sha256:9e700710d709e956c1be9cbda6fce3c8c2dbd020999e04df45e143400197219d"},
-    {file = "python_soql_parser-0.1.10-py3-none-any.whl", hash = "sha256:9d64df5c495870f705cd4e6a8367b5f1494577dc3e0d9486f2dc3b01e8407408"},
+    {file = "python-soql-parser-0.1.11.tar.gz", hash = "sha256:cec6d5611ce434373cafb9a33f4751d9841f087fe31c71547b7556d54e131f5e"},
+    {file = "python_soql_parser-0.1.11-py3-none-any.whl", hash = "sha256:192723f45506a7f88079062665d520dc71d7b4641073afd5566d4ecaee2b65f4"},
 ]
 requests = [
     {file = "requests-2.25.1-py2.py3-none-any.whl", hash = "sha256:c210084e36a42ae6b9219e00e48287def368a26d03a048ddad7bfee44f75871e"},

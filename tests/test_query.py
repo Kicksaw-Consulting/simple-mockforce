@@ -69,7 +69,7 @@ def test_where_bool_query():
 
     results = salesforce.query(
         f"SELECT Id, Name, IsDeleted FROM Opportunity WHERE IsDeleted = true",
-        include_deleted=True
+        include_deleted=True,
     )
     records = results["records"]
     assert len(records) == 1
@@ -80,7 +80,7 @@ def test_where_bool_query():
 
     results = salesforce.query(
         f"SELECT Id, Name, IsDeleted FROM Opportunity WHERE IsDeleted = false",
-        include_deleted=True
+        include_deleted=True,
     )
     records = results["records"]
     assert len(records) == 1
@@ -459,3 +459,21 @@ def test_query_included_deleted_true():
     records_ids = [record["Id"] for record in records]
     assert len(records) == 6
     assert records_ids == account_ids
+
+
+@mock_salesforce
+def test_query_with_date():
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    salesforce.Account.create(
+        {"Name": "A Big Compnay", "LastLogin__c": "2022-06-03T20:42:04.345064"},
+        {"Name": "A Small Compnay", "LastLogin__c": "2022-06-01T20:42:04.345064"},
+    )
+    result = salesforce.query(
+        "Select Name, LastLogin__c From Account Where LastLogin__c > 2022-06-02T00:00:00.000000"
+    )
+    records = result["records"]
+
+    assert len(records) == 1
+    assert records[0]["Name"] == "A Big Compnay"
+    assert records[0]["LastLogin__c"] == "2022-06-03T20:42:04.345064"
