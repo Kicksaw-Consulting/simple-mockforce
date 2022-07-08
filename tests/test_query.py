@@ -260,7 +260,7 @@ def test_query_with_parent_object_attribute():
         {
             "FirstName": "Sundar",
             "LastName": "Pichai",
-            "Account": account_id,
+            "AccountId": account_id,
             "Title": "CEO",
         }
     )
