@@ -9,7 +9,7 @@ from python_soql_parser.tokens import TODAY, TOMORROW, YESTERDAY
 from simple_mockforce import mock_salesforce
 from simple_salesforce import Salesforce
 
-from tests.utils import MOCK_CREDS
+from tests.utils import MOCK_CREDS, MOCK_CREDS_USING_PRIVATE_KEY
 
 import simple_mockforce.query_algorithms.where as where_module
 
@@ -17,6 +17,21 @@ import simple_mockforce.query_algorithms.where as where_module
 @mock_salesforce
 def test_basic_query():
     salesforce = Salesforce(**MOCK_CREDS)
+
+    salesforce.Contact.create({"Name": "Ozzy Osbourne"})
+
+    results = salesforce.query("SELECT Id, Name FROM Contact LIMIT 1")
+    records = results["records"]
+
+    assert len(records) == 1
+    record = records[0]
+    assert record["Id"]
+    assert record["Name"] == "Ozzy Osbourne"
+
+
+@mock_salesforce
+def test_basic_query():
+    salesforce = Salesforce(**MOCK_CREDS_USING_PRIVATE_KEY)
 
     salesforce.Contact.create({"Name": "Ozzy Osbourne"})
 

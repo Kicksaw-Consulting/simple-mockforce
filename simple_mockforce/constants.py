@@ -39,3 +39,15 @@ SOAP_API_LOGIN_RESPONSE = f"""<?xml version="1.0"?>
   </soapenv:Body>
 </soapenv:Envelope>
 """
+
+OAUTH_URL = f"{BASE_URL}/services/oauth2/token"
+OAUTH_RESPONSE = """
+{
+  "access_token":"FAKE_ACCESS_TOKEN",
+  "token_type":"Bearer",
+  "expires_in":3600,
+  "refresh_token":"FAKE_REFRESH_TOKEN",
+  "scope":"create",
+  "instance_url":"https://mock.salesforce.com"
+}
+"""
