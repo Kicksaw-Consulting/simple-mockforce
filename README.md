@@ -28,10 +28,11 @@ from simple_salesforce import Salesforce
 
 @mock_salesforce
 def test_api():
+    # The username, password, and security token are ignored - any value will work.
     salesforce = Salesforce(
-        username=os.getenv["SFDC_USERNAME"],
-        password=os.getenv["SFDC_PASSWORD"],
-        security_token=os.getenv["SFDC_SECURITY_TOKEN"]
+        username=os.getenv("SFDC_USERNAME"),
+        password=os.getenv("SFDC_PASSWORD"),
+        security_token=os.getenv("SFDC_SECURITY_TOKEN")
     )
 
     response = salesforce.Account.create({"Name": "Test Account"})

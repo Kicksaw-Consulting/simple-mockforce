@@ -22,6 +22,8 @@ from simple_mockforce.constants import (
     CREATE_URL,
     JOB_DETAIL_URL,
     LOGIN_URL,
+    OAUTH_RESPONSE,
+    OAUTH_URL,
     SOAP_API_LOGIN_RESPONSE,
     DETAIL_URL,
     QUERY_URL,
@@ -42,6 +44,12 @@ def mock_salesforce(func, *args, **kwargs):
         terminate_regex(LOGIN_URL),
         body=SOAP_API_LOGIN_RESPONSE,
         content_type="text/xml",
+    )
+    responses.add(
+        responses.POST,
+        terminate_regex(OAUTH_URL),
+        body=OAUTH_RESPONSE,
+        content_type="application/json",
     )
     responses.add_callback(
         responses.GET,
