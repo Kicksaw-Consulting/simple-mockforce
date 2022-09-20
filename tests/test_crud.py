@@ -38,7 +38,7 @@ def test_crud_lifecycle():
         "SystemModstamp": creation_time.isoformat(),
         'attributes': {
             "type": "Contact",
-            "url": f"/services/data/v42.0/sobjects/Contact/{contact_id}"
+            "url": f"/services/data/v{salesforce.sf_version}/sobjects/Contact/{contact_id}"
         }
     }
 
