@@ -126,7 +126,7 @@ def test_bulk_upsert_with_relation():
     message1 = salesforce.MessageAttempt__c.get(message1_id)
 
     assert message1["Name"] == "Message 1"
-    assert message1["Contact"] == contact_id
+    assert message1["Contact__c"] == contact_id
     assert message1[custom_message_id_field] == custom_message_id
 
     message1 = salesforce.MessageAttempt__c.get_by_custom_id(
@@ -134,7 +134,7 @@ def test_bulk_upsert_with_relation():
     )
 
     assert message1["Name"] == "Message 2"
-    assert message1["Contact"] == contact_id
+    assert message1["Contact__c"] == contact_id
     assert message1[custom_message_id_field] == custom_message_id2
 
 
