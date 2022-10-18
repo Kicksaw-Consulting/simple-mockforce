@@ -492,3 +492,21 @@ def test_query_with_date():
     assert len(records) == 1
     assert records[0]["Name"] == "A Big Compnay"
     assert records[0]["LastLogin__c"] == "2022-06-03T20:42:04.345064"
+
+
+@mock_salesforce
+def test_query_with_custom_lookup_to_standard_object():
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    salesforce.Contact.create({"Name": "TestContact", "Email": "a@b.com"})
+    salesforce.Order.create(
+        {"Name": "TestOrder", "Contact__r": {"Email": "a@b.com"}},
+    )
+    result = salesforce.query(
+        "Select Name, Contact__r.Email From Order"
+    )
+    records = result["records"]
+
+    assert len(records) == 1
+    assert records[0]["Name"] == "TestOrder"
+    assert records[0]["Contact__r"]["Email"] == "a@b.com"

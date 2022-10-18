@@ -1,4 +1,5 @@
 {
   "Company__r": "Account",
-  "Parent": "Account"
+  "Parent": "Account",
+  "Contact__r": "Contact"
 }
