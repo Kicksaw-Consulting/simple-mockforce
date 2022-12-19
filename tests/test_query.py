@@ -82,7 +82,7 @@ def test_where_in_query():
     records = results["records"]
     assert len(records) == 0
 
-    results = salesforce.query(f"SELECT Id, Name FROM Lead WHERE Title IN ('CDO')")
+    results = salesforce.query(f"SELECT Id, Name, Title FROM Lead WHERE Title IN ('CDO')")
     records = results["records"]
     assert len(records) == 1
     record = records[0]
