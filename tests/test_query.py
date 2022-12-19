@@ -70,6 +70,26 @@ def test_where_basic_query():
     assert record["Name"] == "Jim Bean"
     assert record["Title"] == "CDO"
 
+@mock_salesforce
+def test_where_in_query():
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    response = salesforce.Lead.create({"Name": "Jim Bean", "Title": "CDO"})
+    sfdc_id = response["id"]
+    response = salesforce.Lead.create({"Name": "Corey Taylor", "Title": "Singer"})
+
+    results = salesforce.query(f"SELECT Id, Name FROM Lead WHERE Id in ('nothing')")
+    records = results["records"]
+    assert len(records) == 0
+
+    results = salesforce.query(f"SELECT Id, Name FROM Lead WHERE Title IN ('CDO')")
+    records = results["records"]
+    assert len(records) == 1
+    record = records[0]
+    assert record["Id"] == sfdc_id
+    assert record["Name"] == "Jim Bean"
+    assert record["Title"] == "CDO"
+
 
 @mock_salesforce
 def test_where_bool_query():
