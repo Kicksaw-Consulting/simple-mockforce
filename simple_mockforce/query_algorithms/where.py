@@ -132,7 +132,7 @@ def _parse_clause(clause: list) -> Union[str, List[str]]:
     if type(dirty_value) == list:
         if dirty_value[0] == "(" and dirty_value[-1] == ")":
             values = dirty_value[1:-1]
-            value = [_clean_string(dirty_value) for value in values]
+            value = [_clean_string(value) for value in values]
     else:
         value = _clean_string(dirty_value)
     return field, binop, _to_python(value)
