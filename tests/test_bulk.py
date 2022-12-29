@@ -1,3 +1,5 @@
+import pytest
+
 from simple_salesforce import Salesforce
 from simple_salesforce.exceptions import SalesforceResourceNotFound
 
@@ -34,6 +36,34 @@ def test_bulk_lifecycle():
     account2 = salesforce.Account.get(sfdc_id2)
 
     assert account["Name"] == "Test Account - updated"
+    assert account2["Name"] == "Test Account 2"
+
+
+@mock_salesforce
+def test_bulk_lifecycle_delete():
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    result = salesforce.bulk.Account.insert(
+        [{"Name": "Test Account"}, {"Name": "Test Account 2"}]
+    )
+
+    assert len(result) == 2
+    assert result[0]["success"]
+    assert result[1]["success"]
+
+    sfdc_id = result[0]["id"]
+    sfdc_id2 = result[1]["id"]
+
+    result = salesforce.bulk.Account.delete(
+        [{'Id': sfdc_id}]
+    )
+    assert len(result) == 1
+    assert result[0]["success"]
+
+    with pytest.raises(SalesforceResourceNotFound):
+        salesforce.Contact.get(sfdc_id)
+
+    account2 = salesforce.Account.get(sfdc_id2)
     assert account2["Name"] == "Test Account 2"
 
 

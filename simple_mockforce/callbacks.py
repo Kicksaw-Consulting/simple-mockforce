@@ -219,6 +219,12 @@ def bulk_result_callback(request):
             sfdc_ids.append(id_)
         elif operation == "insert":
             id_ = virtual_salesforce.create(sobject_name, sobject)
+            id_to_created[id_] = True
+            sfdc_ids.append(id_)
+        elif operation == "delete":
+            # TODO: we'll have to address this if we ever normalize the casing
+            id_ = sobject["Id"]
+            virtual_salesforce.delete(sobject_name, id_)
             sfdc_ids.append(id_)
         else:
             raise AssertionError(f"Invalid operation: {operation}")
@@ -244,7 +250,7 @@ def bulk_result_callback(request):
             fake_response.append(
                 {
                     "success": True,
-                    "created": id_to_created.get(id_, True),
+                    "created": id_to_created.get(id_, False),
                     # yep, Salesforce returns the id lowercased in bulk responses
                     "id": id_,
                     "errors": [],
