@@ -88,6 +88,11 @@ class VirtualSalesforce:
 
         limit = parse_results["limit"].asList()
 
+        try:
+            offset = parse_results["offset"].asList()
+        except KeyError:
+            offset = []
+
         # TODO: why do we need to check?
         order_by = (
             parse_results["order_by"].asList() if "order_by" in parse_results else None
@@ -110,6 +115,10 @@ class VirtualSalesforce:
                 add_parent_object_attributes(sobject, record, parent_fields, self)
 
             records.append(record)
+
+        if offset:
+            offset: int = offset[0]
+            records = records[offset:]
 
         if limit:
             limit: int = limit[0]
