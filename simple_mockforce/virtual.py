@@ -113,12 +113,15 @@ class VirtualSalesforce:
 
             records.append(record)
 
+        # negative limit and offset values are invalid in soql.  
         if offset:
             offset: int = offset[0]
-            records = records[offset:] if offset >= 0 else records
+            assert offset > -1, "SOQL offset must be a non-negative value"
+            records = records[offset:]
 
         if limit:
             limit: int = limit[0]
+            assert limit > -1, "Limit must be a non-negative value"
             records = records[:limit]
 
         return records
