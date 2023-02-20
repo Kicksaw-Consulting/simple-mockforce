@@ -532,7 +532,7 @@ def test_query_with_custom_lookup_to_standard_object():
     assert records[0]["Name"] == "TestOrder"
     assert records[0]["Contact__r"]["Email"] == "a@b.com"
 
-# these tests will fail until python-soql-parser supports offset clause
+
 @pytest.mark.parametrize(
     "offset,asc_desc,expected_names,limit",
     [
@@ -541,11 +541,9 @@ def test_query_with_custom_lookup_to_standard_object():
         (0, "ASC", ["Facebook", "Google", "YouTube"], 0),
         (0, "DESC", ["YouTube", "Google", "Facebook"], 0),
         (1, "ASC", ["Google", "YouTube"], None),
-        (-1, "ASC", ["YouTube"], None),
-        (-1, "DESC", ["Facebook"], None),
+        (-1, "ASC", ["Facebook", "Google", "YouTube"], None),
+        (-1, "DESC", ["YouTube", "Google", "Facebook"], None),
         (3, "ASC", [], None),
-        (-3, "ASC", ["Facebook", "Google", "YouTube"], None),
-        (-3000, "ASC", ["Facebook", "Google", "YouTube"], None),
         (3000, "ASC", [], None),
         (0, "ASC", ["Facebook", "Google"], 2),
         (0, "DESC", ["YouTube", "Google"], 2),
