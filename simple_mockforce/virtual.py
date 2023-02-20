@@ -88,10 +88,7 @@ class VirtualSalesforce:
 
         limit = parse_results["limit"].asList()
 
-        try:
-            offset = parse_results["offset"].asList()
-        except KeyError:
-            offset = []
+        offset = parse_results["offset"].asList()
 
         # TODO: why do we need to check?
         order_by = (
@@ -118,7 +115,7 @@ class VirtualSalesforce:
 
         if offset:
             offset: int = offset[0]
-            records = records[offset:]
+            records = records[offset:] if offset >= 0 else records
 
         if limit:
             limit: int = limit[0]
