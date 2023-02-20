@@ -514,7 +514,6 @@ def test_query_with_date():
     assert records[0]["LastLogin__c"] == "2022-06-03T20:42:04.345064"
 
 
-@pytest.mark.skip  # broken
 @mock_salesforce
 def test_query_with_custom_lookup_to_standard_object():
     salesforce = Salesforce(**MOCK_CREDS)

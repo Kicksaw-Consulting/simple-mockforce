@@ -116,7 +116,6 @@ def test_bulk_lifecycle_upsert_key():
     assert fetched_by_sfdc_id["Name"] == "Worst Account Ever"
 
 
-@pytest.mark.skip  # broken
 @mock_salesforce
 def test_bulk_upsert_with_relation():
     salesforce = Salesforce(**MOCK_CREDS)
@@ -169,7 +168,6 @@ def test_bulk_upsert_with_relation():
     assert message1[custom_message_id_field] == custom_message_id2
 
 
-@pytest.mark.skip  # broken
 @mock_salesforce
 def test_bulk_upsert_with_weird_relation():
     salesforce = Salesforce(**MOCK_CREDS)
