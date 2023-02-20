@@ -534,31 +534,49 @@ def test_query_with_custom_lookup_to_standard_object():
 
 
 @pytest.mark.parametrize(
-    "offset,asc_desc,expected_names,limit",
+    "offset,asc_desc,expected_names,limit,error",
     [
-        (0, "ASC", ["Facebook", "Google", "YouTube"], None),
-        (0, "DESC", ["YouTube", "Google", "Facebook"], None),
-        (0, "ASC", ["Facebook", "Google", "YouTube"], 0),
-        (0, "DESC", ["YouTube", "Google", "Facebook"], 0),
-        (1, "ASC", ["Google", "YouTube"], None),
-        (-1, "ASC", ["Facebook", "Google", "YouTube"], None),
-        (-1, "DESC", ["YouTube", "Google", "Facebook"], None),
-        (3, "ASC", [], None),
-        (3000, "ASC", [], None),
-        (0, "ASC", ["Facebook", "Google"], 2),
-        (0, "DESC", ["YouTube", "Google"], 2),
-        (1, "ASC", ["Google", "YouTube"], 2),
-        (1, "DESC", ["Google", "Facebook"], 2),
-        (2, "ASC", ["YouTube"], 2),
-        (2, "DESC", ["Facebook"], 2),
-        (1, "ASC", ["Google",], 1),
-        (1, "DESC", ["Google",], 1),
-        (3, "ASC", [], 2),
-        (3, "DESC", [], 2),
+        # no limit no order no offset
+        (None, None, ["Google", "YouTube", "Facebook"], None, False),
+        # order only
+        (None, "ASC", ["Facebook", "Google", "YouTube"], None, False),
+        (None, "DESC", ["YouTube", "Google", "Facebook"], None, False),
+        # offset and order
+        (0, "ASC", ["Facebook", "Google", "YouTube"], None, False),
+        (0, "DESC", ["YouTube", "Google", "Facebook"], None, False),
+        # limit 0
+        (0, "ASC", [], 0, False),
+        (0, "DESC", [], 0, False),
+        # offset base
+        (1, "ASC", ["Google", "YouTube"], None, False),
+        (3, "ASC", [], None, False),
+        (3000, "ASC", [], None, False),
+        # offset and limit and order
+        (0, "ASC", ["Facebook", "Google"], 2, False),
+        (0, "DESC", ["YouTube", "Google"], 2, False),
+        (1, "ASC", ["Google", "YouTube"], 2, False),
+        (1, "DESC", ["Google", "Facebook"], 2, False),
+        (2, "ASC", ["YouTube"], 2, False),
+        (2, "DESC", ["Facebook"], 2, False),
+        (1, "ASC", ["Google",], 1, False),
+        (1, "DESC", ["Google",], 1, False),
+        (3, "ASC", [], 2, False),
+        (3, "DESC", [], 2, False),
+        # error cases
+        (0, "ASC", None, -1, True),
+        (0, "DESC", None, -1, True),
+        (-1, "ASC", None, None, True),
+        (-1, "DESC", None, None, True),
+        (-1, "ASC", None, 1, True),
+        (-1, "DESC", None, 1, True),
+        (-1, "ASC", None, -1, True),
+        (-1, "DESC", None, -1, True),
+        (None, "ASC", None, -1, True),
+        (None, "DESC", None, -1, True),
     ],
 )
 @mock_salesforce
-def test_query_offset(offset,asc_desc,expected_names,limit):
+def test_query_offset_limit_order(offset, asc_desc, expected_names, limit, error):
     salesforce = Salesforce(**MOCK_CREDS)
     salesforce.bulk.Account.insert(
         [
@@ -567,7 +585,13 @@ def test_query_offset(offset,asc_desc,expected_names,limit):
             {"Name": "Facebook"},
         ]
     )
-    limit_clause = f" LIMIT {limit} " if limit else ""
-    results = salesforce.query(f"SELECT Name FROM Account ORDER BY Name {asc_desc} {limit_clause} OFFSET {offset}")
-    actual_names = [rec["Name"] for rec in results["records"]]
-    assert actual_names == expected_names, "offset results match expected"
+    order_by_clause = f" ORDER BY Name {asc_desc} " if asc_desc is not None else ""
+    limit_clause = f" LIMIT {limit} " if limit is not None else ""
+    offset_clause = f" OFFSET {offset} " if offset else ""
+    if error:
+        with pytest.raises(AssertionError):
+            salesforce.query(f"SELECT Name FROM Account {order_by_clause} {limit_clause} {offset_clause}")
+    else:
+        results = salesforce.query(f"SELECT Name FROM Account {order_by_clause} {limit_clause} {offset_clause}")
+        actual_names = [rec["Name"] for rec in results["records"]]
+        assert actual_names == expected_names, "offset results match expected"
