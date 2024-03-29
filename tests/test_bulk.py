@@ -222,3 +222,129 @@ def test_bulk_upsert_with_duplicate_items_in_batch():
     for record in results:
         assert not record["success"]
         assert record["errors"][0]["statusCode"] == "DUPLICATE_EXTERNAL_ID"
+
+
+@mock_salesforce
+def test_bulk_query_lazy() -> None:
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    spaceship_insert_results = salesforce.bulk.Spaceship__c.insert(
+        [
+            {"Name": "Millenium Falcon", "KesselRunParsecs": 12},
+            {"Name": "Lady Luck", "KesselRunParsecs": 14},
+        ]
+    )
+
+    millenium_falcon_id = spaceship_insert_results[0]["id"]
+    lady_luck_id = spaceship_insert_results[1]["id"]
+
+    salesforce.bulk.Contact.insert(
+        [
+            {
+                "Name": "Chewbacca",
+                "Occupation": "Smuggler",
+                "Spaceship__c": millenium_falcon_id,
+            },
+            {
+                "Name": "Han Solo",
+                "Occupation": "Smuggler",
+                "Spaceship__c": millenium_falcon_id,
+            },
+            {
+                "Name": "Lando Calrissian",
+                "Occupation": "Gas Mining Station Governor",
+                "Spaceship__c": lady_luck_id,
+            },
+        ]
+    )
+
+    batches = salesforce.bulk.Contact.query(
+        """SELECT
+            Name,
+            Occupation,
+            Spaceship__r.Name
+        FROM Contact
+        WHERE Occupation = 'Smuggler'
+        ORDER BY Name""",
+        lazy_operation=True,
+    )
+
+    batches_list = list(batches)
+
+    assert len(batches_list) == 1
+
+    batch = batches_list[0]
+
+    assert batch == [
+        {
+            "Name": "Chewbacca",
+            "Occupation": "Smuggler",
+            "Spaceship__r": {"Name": "Millenium Falcon"},
+        },
+        {
+            "Name": "Han Solo",
+            "Occupation": "Smuggler",
+            "Spaceship__r": {"Name": "Millenium Falcon"},
+        },
+    ]
+
+
+@mock_salesforce
+def test_bulk_query_not_lazy() -> None:
+    salesforce = Salesforce(**MOCK_CREDS)
+
+    spaceship_insert_results = salesforce.bulk.Spaceship__c.insert(
+        [
+            {"Name": "Millenium Falcon", "KesselRunParsecs": 12},
+            {"Name": "Lady Luck", "KesselRunParsecs": 14},
+        ]
+    )
+
+    millenium_falcon_id = spaceship_insert_results[0]["id"]
+    lady_luck_id = spaceship_insert_results[1]["id"]
+
+    salesforce.bulk.Contact.insert(
+        [
+            {
+                "Name": "Chewbacca",
+                "Occupation": "Smuggler",
+                "Spaceship__c": millenium_falcon_id,
+            },
+            {
+                "Name": "Han Solo",
+                "Occupation": "Smuggler",
+                "Spaceship__c": millenium_falcon_id,
+            },
+            {
+                "Name": "Lando Calrissian",
+                "Occupation": "Gas Mining Station Governor",
+                "Spaceship__c": lady_luck_id,
+            },
+        ]
+    )
+
+    records = salesforce.bulk.Contact.query(
+        """SELECT
+            Name,
+            Occupation,
+            Spaceship__r.Name
+        FROM Contact
+        WHERE Occupation = 'Smuggler'
+        ORDER BY Name""",
+        lazy_operation=False,
+    )
+
+    assert len(records) == 2
+
+    assert records == [
+        {
+            "Name": "Chewbacca",
+            "Occupation": "Smuggler",
+            "Spaceship__r": {"Name": "Millenium Falcon"},
+        },
+        {
+            "Name": "Han Solo",
+            "Occupation": "Smuggler",
+            "Spaceship__r": {"Name": "Millenium Falcon"},
+        },
+    ]

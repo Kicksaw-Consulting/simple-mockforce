@@ -42,6 +42,13 @@ def parse_batch_result_url(url: str):
     batch_id = split_up[-2]
     return job_id, batch_id
 
+def parse_batch_query_result_url(url: str):
+    split_up = url.split("/")
+    job_id = split_up[-5]
+    batch_id = split_up[-3]
+    result_set_id = split_up[-1]
+    return job_id, batch_id, result_set_id
+
 
 def find_object_and_index(objects: list, pk_name: str, pk: str):
     index = None
