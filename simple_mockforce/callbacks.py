@@ -283,11 +283,7 @@ def bulk_result_callback(request):
 def bulk_query_result_callback(request):
     path = urlparse(request.url).path
 
-    job_id, batch_id, result_set_id = parse_batch_query_result_url(path)
-
-    job = virtual_salesforce.jobs[job_id]
-    assert job["operation"] == "query"
-
+    _, batch_id, result_set_id = parse_batch_query_result_url(path)
     data = virtual_salesforce.batch_data[batch_id][result_set_id]
 
     return (
