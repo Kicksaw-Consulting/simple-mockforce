@@ -7,6 +7,7 @@ from simple_mockforce.callbacks import (
     bulk_callback,
     bulk_detail_callback,
     bulk_result_callback,
+    bulk_query_result_callback,
     create_callback,
     delete_callback,
     get_callback,
@@ -19,6 +20,7 @@ from simple_mockforce.callbacks import (
 from simple_mockforce.constants import (
     BATCH_DETAIL_URL,
     BATCH_RESULT_URL,
+    BATCH_QUERY_RESULT_URL,
     CREATE_URL,
     JOB_DETAIL_URL,
     LOGIN_URL,
@@ -92,6 +94,12 @@ def mock_salesforce(func, *args, **kwargs):
         responses.GET,
         terminate_regex(BATCH_RESULT_URL),
         callback=bulk_result_callback,
+        content_type="content/json",
+    )
+    responses.add_callback(
+        responses.GET,
+        terminate_regex(BATCH_QUERY_RESULT_URL),
+        callback=bulk_query_result_callback,
         content_type="content/json",
     )
     responses.add_callback(

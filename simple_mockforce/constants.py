@@ -22,6 +22,7 @@ BATCH_DETAIL_URL = (
 BATCH_RESULT_URL = (
     f"{BASE_URL}/services/async/{SF_VERSION}/job/{SFDC_ID}/batch/{SFDC_ID}/result"
 )
+BATCH_QUERY_RESULT_URL = f"{BATCH_RESULT_URL}/{SFDC_ID}"
 
 
 # login stuff

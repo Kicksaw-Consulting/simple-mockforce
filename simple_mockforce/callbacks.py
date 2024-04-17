@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 from simple_mockforce.error_codes import NOT_FOUND
 from simple_mockforce.utils import (
     parse_batch_detail_url,
+    parse_batch_query_result_url,
     parse_batch_result_url,
     parse_detail_url,
     parse_create_url,
@@ -150,13 +151,18 @@ def job_callback(request):
 def bulk_callback(request):
     url = request.url
     path = urlparse(url).path
-    body = json.loads(request.body)
 
     job_id = parse_job_batch_url(path)
     job = virtual_salesforce.jobs[job_id]
     operation = job["operation"]
 
-    batch = virtual_salesforce.create_batch(job_id, body, operation)
+    if operation == "query":
+        # For testing purposes we only return one results set.
+        data = {"752x00000004CJE": virtual_salesforce.query(request.body)}
+    else:
+        data = json.loads(request.body)
+
+    batch = virtual_salesforce.create_batch(job_id, data, operation)
 
     return (
         201,
@@ -193,7 +199,17 @@ def bulk_result_callback(request):
     job = virtual_salesforce.jobs[job_id]
     sobject_name = job["object"]
     operation = job["operation"]
+
     data = virtual_salesforce.batch_data[batch_id]
+
+    if operation == "query":
+        return (
+            201,
+            {},
+            # Keys of the query data are result set ids
+            json.dumps(list(data.keys()))
+        )
+
 
     id_to_created = dict()
 
@@ -261,6 +277,19 @@ def bulk_result_callback(request):
         201,
         {},
         json.dumps(fake_response),
+    )
+
+
+def bulk_query_result_callback(request):
+    path = urlparse(request.url).path
+
+    _, batch_id, result_set_id = parse_batch_query_result_url(path)
+    data = virtual_salesforce.batch_data[batch_id][result_set_id]
+
+    return (
+        201,
+        {},
+        json.dumps(data),
     )
 
 
