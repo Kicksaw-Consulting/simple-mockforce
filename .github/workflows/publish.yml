@@ -27,11 +27,7 @@ jobs:
         env:
           MOCKFORCE_RELATIONS_ROOT: tests
       - name: Publish
-        env:
-          PYPI_USER: Kicksaw
-          PYPI_PASS: ${{ secrets.PYPI_PASS }}
-        run: |
-          poetry publish --build --username $PYPI_USER --password $PYPI_PASS
+        run: poetry publish --build --username __token__ --password ${{ secrets.PYPI_TOKEN }}
       - name: Slack Notifications
         uses: Kicksaw-Consulting/notify-slack-action@master
         if: always()
